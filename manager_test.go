@@ -10,10 +10,9 @@ import (
 	"testing"
 )
 
-var ShouldFail = errors.New("Should fail")
+var ShouldHaveFailed = errors.New("Should have failed.")
 
 func TestManager_Table_EmptyString(t *testing.T) {
-	//mgr, err := initAndWriteTables()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -29,7 +28,6 @@ func TestManager_Table_EmptyString(t *testing.T) {
 }
 
 func TestManager_Table_UnknownString(t *testing.T) {
-	//mgr, err := initAndWriteTables()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -45,7 +43,6 @@ func TestManager_Table_UnknownString(t *testing.T) {
 }
 
 func TestManager_AddTable_KeyEmptyString(t *testing.T) {
-	//mgr, err := initAndWriteTables()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -64,7 +61,6 @@ func TestManager_AddTable_KeyEmptyString(t *testing.T) {
 }
 
 func TestManager_AddTable_NilTable(t *testing.T) {
-	//mgr, err := initAndWriteTables()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +75,6 @@ func TestManager_AddTable_NilTable(t *testing.T) {
 }
 
 func TestManager_AddTable_KeyCollision(t *testing.T) {
-	//mgr, err := initAndWriteTables()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -94,12 +89,11 @@ func TestManager_AddTable_KeyCollision(t *testing.T) {
 
 	err = mgr.AddTable(TPerson, newTable)
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
 }
 
 func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
-	//mgr, err := initAndWriteTables()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -111,12 +105,11 @@ func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
 
 	_, err = mgr.CreateTablesSQL()
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
 }
 
 func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
-	//mgr, err := initAndWriteTables()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -128,7 +121,7 @@ func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 
 	_, err = mgr.CreateTableIndexesSQL()
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
 }
 
@@ -294,6 +287,7 @@ func Test_Manager_Manager_Save(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// See if we can read the record that was just written
 	valid, err := contains(mgr.db, rec.table.name, pk)
 	if err != nil {
 		t.Fatal(err)
@@ -337,6 +331,7 @@ func Test_Manager_Manager_Batch(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// See if the 2 records added are readable
 	valid, err := contains(mgr.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
@@ -344,8 +339,6 @@ func Test_Manager_Manager_Batch(t *testing.T) {
 	if !valid {
 		t.Fatal(errors.New("Value not in database"))
 	}
-	log.Println("Found", VPersonID0, "in DB")
-
 	valid, err = contains(mgr.db, records[1].table.name, VPersonID1)
 	if err != nil {
 		t.Fatal(err)
@@ -353,7 +346,6 @@ func Test_Manager_Manager_Batch(t *testing.T) {
 	if !valid {
 		t.Fatal(errors.New("Value not in database"))
 	}
-	log.Println("Found", VPersonID1, "in DB")
 }
 
 func Test_Manager_Manager_Begin_DBNil(t *testing.T) {
@@ -361,7 +353,7 @@ func Test_Manager_Manager_Begin_DBNil(t *testing.T) {
 
 	err := mgr.Begin()
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
 }
 
@@ -380,7 +372,7 @@ func Test_Manager_Manager_Begin_DoubleTx(t *testing.T) {
 	// Should fail
 	err = mgr.Begin()
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
 	t.Log(err)
 }
@@ -395,7 +387,7 @@ func Test_Manager_Manager_Commit_NilTx(t *testing.T) {
 	// Should fail
 	err = mgr.Commit()
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
 	t.Log(err)
 }
@@ -497,7 +489,7 @@ func Test_Manager_Manager_Save_MissingNotNullValue(t *testing.T) {
 
 	err = mgr.Save(rec)
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
 }
 
@@ -533,75 +525,8 @@ func Test_Manager_Manager_Save_MissingPK(t *testing.T) {
 
 	err = mgr.Save(rec)
 	if err == nil {
-		t.Fatal(ShouldFail)
+		t.Fatal(ShouldHaveFailed)
 	}
-}
-
-func nPersonRecords(persons *Table, n int) ([]*Record, error) {
-	records := make([]*Record, n)
-
-	for i := 0; i < n; i++ {
-		rec := persons.NewRecord()
-		err := simplePersonRecord(rec, i)
-		if err != nil {
-			return nil, err
-		}
-		records[i] = rec
-	}
-	return records, nil
-}
-
-func simplePersonRecord(rec *Record, n int) error {
-	rec.AddValue(FId, n)
-
-	err := rec.AddValue(FName, "Fred_"+strconv.Itoa(n))
-	if err != nil {
-		return err
-	}
-
-	err = rec.AddValue(FAge, 54)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func twoPersonRecords(persons *Table) ([]*Record, error) {
-	records := make([]*Record, 2)
-
-	rec1 := persons.NewRecord()
-	records[0] = rec1
-	err := rec1.AddValue(FId, VPersonID0)
-	if err != nil {
-		return nil, err
-	}
-	err = rec1.AddValue(FName, "Fred")
-	if err != nil {
-		return nil, err
-	}
-
-	err = rec1.AddValue(FAge, 54)
-	if err != nil {
-		return nil, err
-	}
-
-	rec2 := persons.NewRecord()
-	records[1] = rec2
-	err = rec2.AddValue(FId, VPersonID1)
-	if err != nil {
-		return nil, err
-	}
-	err = rec2.AddValue(FName, "Harry")
-	if err != nil {
-		return nil, err
-	}
-
-	err = rec2.AddValue(FAge, 21)
-	if err != nil {
-		return nil, err
-	}
-
-	return records, nil
 }
 
 func Test_Manager_Manager_Get(t *testing.T) {
@@ -675,6 +600,76 @@ func Test_Manager_Manager_Get(t *testing.T) {
 	//t.Log(rec.values[2].value)
 
 }
+
+// Helpers
+
+func nPersonRecords(persons *Table, n int) ([]*Record, error) {
+	records := make([]*Record, n)
+
+	for i := 0; i < n; i++ {
+		rec := persons.NewRecord()
+		err := simplePersonRecord(rec, i)
+		if err != nil {
+			return nil, err
+		}
+		records[i] = rec
+	}
+	return records, nil
+}
+
+func simplePersonRecord(rec *Record, n int) error {
+	rec.AddValue(FId, n)
+
+	err := rec.AddValue(FName, "Fred_"+strconv.Itoa(n))
+	if err != nil {
+		return err
+	}
+
+	err = rec.AddValue(FAge, 54)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func twoPersonRecords(persons *Table) ([]*Record, error) {
+	records := make([]*Record, 2)
+
+	rec1 := persons.NewRecord()
+	records[0] = rec1
+	err := rec1.AddValue(FId, VPersonID0)
+	if err != nil {
+		return nil, err
+	}
+	err = rec1.AddValue(FName, "Fred")
+	if err != nil {
+		return nil, err
+	}
+
+	err = rec1.AddValue(FAge, 54)
+	if err != nil {
+		return nil, err
+	}
+
+	rec2 := persons.NewRecord()
+	records[1] = rec2
+	err = rec2.AddValue(FId, VPersonID1)
+	if err != nil {
+		return nil, err
+	}
+	err = rec2.AddValue(FName, "Harry")
+	if err != nil {
+		return nil, err
+	}
+
+	err = rec2.AddValue(FAge, 21)
+	if err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}
+
 func openTestDB() (*sql.DB, error) {
 	return sql.Open("sqlite3", ":memory:")
 }

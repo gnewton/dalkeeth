@@ -445,3 +445,7 @@ func (d *DialectSqlite3) makeOrderByFields(fields []*SelectField) string {
 	}
 	return s
 }
+
+func (d *DialectSqlite3) ArbitraryFunc(string, []any) (string, error) {
+	return "", NotImplemented
+}

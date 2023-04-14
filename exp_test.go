@@ -2,7 +2,7 @@ package dalkeeth
 
 import (
 	// "errors"
-	"fmt"
+	"log"
 	"testing"
 )
 
@@ -18,7 +18,7 @@ func TestSimple_Positive(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println(s)
+	log.Println(s)
 }
 
 func TestComplex_Positive(t *testing.T) {
@@ -35,7 +35,7 @@ func TestComplex_Positive(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println(s)
+	log.Println(s)
 }
 
 func TestSimpleStringString_Positive(t *testing.T) {
@@ -55,7 +55,7 @@ func TestSimpleStringString_Positive(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			fmt.Println(s)
+			log.Println(s)
 		}
 	}
 

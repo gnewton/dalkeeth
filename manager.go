@@ -101,7 +101,7 @@ func (m *Manager) AddForeignKey(tbl *Table, field string, foreignTbl *Table, for
 	}
 
 	if field == "" {
-		return fmt.Errorf("manager.AddForeignKey: Field is empty")
+		return fmt.Errorf("manager.AddForeignKey: Field name is empty")
 	}
 	if foreignKeyField == "" {
 		return fmt.Errorf("manager.AddForeignKey: foreignKeyField is empty")
@@ -126,6 +126,10 @@ func (m *Manager) AddForeignKey(tbl *Table, field string, foreignTbl *Table, for
 	}
 
 	return tbl.addForeignKey(f, foreignTbl, fk)
+}
+
+func (m *Manager) BatchChannel(chunkSize int) (chan *Record, error) {
+	return nil, NotImplemented
 }
 
 func (m *Manager) Batch(recs []*Record) error {

@@ -1,0 +1,46 @@
+
+
+personTbl := ....
+joinTbl := ....
+companyTbl:= ...
+// indexes
+
+manager // add tables, indexes
+manager.Create tables, indexes
+
+
+// builder - for single table builds
+b := manager.QueryBuilder(table)
+// Setup
+b.Order(order)
+b.Limit(limit)
+b.Offset(offset)
+b.Fields(fields...) // fields to return
+b.PK(pkValues...) // pk ids to query on id in(pkvalues)
+b.Query(query)
+b.GroupBy(string)
+b.Having(query)
+b.Distinct(fields...)
+//Run
+b.First().Rows()
+b.Last().Rows()
+b.All().Row()
+b.Exists().Rows()
+
+}
+
+from: https://empire-db.apache.org/pages/home.html
+
+DBCommand cmd = context.createCommand()
+   .select  (BRAND.NAME, MODEL.SPECIFICATION, MODEL.BASE_PRICE)
+   .select  (SALES.MODEL_ID.count(), SALES.PRICE.avg())
+   .select  (SALES.PRICE.avg().minus(MODEL.BASE_PRICE.avg()).round(2).as("DIFFERENCE"))
+   .join    (MODEL.WMI, BRAND.WMI)
+   .joinLeft(MODEL.ID, SALES.MODEL_ID, SALES.YEAR.is(2021))  // only year 2021
+   .where   (MODEL.ENGINE_TYPE.in(EngineType.P, EngineType.H, EngineType.E)) // Petrol, Hybrid, Electric
+   .where   (MODEL.BASE_PRICE.isGreaterThan(30000))
+   .groupBy (BRAND.NAME, MODEL.SPECIFICATION, MODEL.BASE_PRICE)
+   .having  (SALES.MODEL_ID.count().isGreaterThan(5))   // more than 5 sales
+   .orderBy (BRAND.NAME.desc(), MODEL.SPECIFICATION.asc());
+
+

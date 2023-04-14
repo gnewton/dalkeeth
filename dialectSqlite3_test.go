@@ -8,6 +8,7 @@ import (
 )
 
 func TestDialectSqlte3(t *testing.T) {
+	setupTest()
 	mgr, err := initAndWriteTestTables()
 
 	if err != nil {

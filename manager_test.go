@@ -13,6 +13,7 @@ import (
 var ShouldHaveFailed = errors.New("Should have failed.")
 
 func TestManager_Table_EmptyString(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -28,6 +29,7 @@ func TestManager_Table_EmptyString(t *testing.T) {
 }
 
 func TestManager_Table_UnknownString(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -43,6 +45,7 @@ func TestManager_Table_UnknownString(t *testing.T) {
 }
 
 func TestManager_AddTable_KeyEmptyString(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -61,6 +64,7 @@ func TestManager_AddTable_KeyEmptyString(t *testing.T) {
 }
 
 func TestManager_AddTable_NilTable(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -75,6 +79,7 @@ func TestManager_AddTable_NilTable(t *testing.T) {
 }
 
 func TestManager_AddTable_KeyCollision(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -94,6 +99,7 @@ func TestManager_AddTable_KeyCollision(t *testing.T) {
 }
 
 func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -110,6 +116,7 @@ func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
 }
 
 func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -126,40 +133,20 @@ func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 }
 
 func TestManager_AddForeignKey_NilTable(t *testing.T) {
+	setupTest()
 	//t.Fatal(NotImplemented)
 }
 
 func Test_ManagerInitTables2(t *testing.T) {
+	setupTest()
 	_, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func addForeignKey_Setup() (*Manager, *Table, *Table, error) {
-	mgr, err := initTestTables()
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	persons := mgr.Table(TPerson)
-
-	if persons == nil {
-		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPerson)
-	}
-
-	addresses := mgr.Table(TAddressK)
-
-	if addresses == nil {
-		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TAddressK)
-	}
-
-	return mgr, persons, addresses, nil
-
-}
-
 func Test_Manager_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
+	setupTest()
 	mgr, persons, addresses, err := addForeignKey_Setup()
 
 	if err != nil {
@@ -172,6 +159,7 @@ func Test_Manager_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
 }
 
 func Test_Manager_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
+	setupTest()
 	mgr, err := initTestTables()
 
 	if err != nil {
@@ -197,6 +185,7 @@ func Test_Manager_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 }
 
 func Test_Manager_Manager_SaveTx(t *testing.T) {
+	setupTest()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
@@ -253,6 +242,7 @@ func Test_Manager_Manager_SaveTx(t *testing.T) {
 }
 
 func Test_Manager_Manager_Save(t *testing.T) {
+	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -298,6 +288,7 @@ func Test_Manager_Manager_Save(t *testing.T) {
 }
 
 func Test_Manager_Manager_Batch(t *testing.T) {
+	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -349,6 +340,7 @@ func Test_Manager_Manager_Batch(t *testing.T) {
 }
 
 func Test_Manager_Manager_Begin_DBNil(t *testing.T) {
+	setupTest()
 	mgr := NewManager()
 
 	err := mgr.Begin()
@@ -358,6 +350,7 @@ func Test_Manager_Manager_Begin_DBNil(t *testing.T) {
 }
 
 func Test_Manager_Manager_Begin_DoubleTx(t *testing.T) {
+	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -374,10 +367,11 @@ func Test_Manager_Manager_Begin_DoubleTx(t *testing.T) {
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
-	t.Log(err)
+	log.Println(err)
 }
 
 func Test_Manager_Manager_Commit_NilTx(t *testing.T) {
+	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -389,10 +383,11 @@ func Test_Manager_Manager_Commit_NilTx(t *testing.T) {
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
-	t.Log(err)
+	log.Println(err)
 }
 
 func Test_Manager_Manager_BatchMany(t *testing.T) {
+	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -460,6 +455,7 @@ func contains(db *sql.DB, tableName string, id int64) (bool, error) {
 }
 
 func Test_Manager_Manager_Save_MissingNotNullValue(t *testing.T) {
+	setupTest()
 	db, err := openTestDB()
 	if err != nil {
 		t.Error(err)
@@ -494,6 +490,7 @@ func Test_Manager_Manager_Save_MissingNotNullValue(t *testing.T) {
 }
 
 func Test_Manager_Manager_Save_MissingPK(t *testing.T) {
+	setupTest()
 	db, err := openTestDB()
 	if err != nil {
 		t.Error(err)
@@ -530,6 +527,7 @@ func Test_Manager_Manager_Save_MissingPK(t *testing.T) {
 }
 
 func Test_Manager_Manager_Get(t *testing.T) {
+	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
 		t.Fatal(err)
@@ -588,8 +586,8 @@ func Test_Manager_Manager_Get(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log("VALUE=", rec.values[0].value)
-	t.Log("VALUE=", rec.values[0].value)
+	log.Println("VALUE=", rec.values[0].value)
+	log.Println("VALUE=", rec.values[0].value)
 
 	switch v := rec.values[0].value.(type) {
 	case *int64:
@@ -672,4 +670,26 @@ func twoPersonRecords(persons *Table) ([]*Record, error) {
 
 func openTestDB() (*sql.DB, error) {
 	return sql.Open("sqlite3", ":memory:")
+}
+func addForeignKey_Setup() (*Manager, *Table, *Table, error) {
+	mgr, err := initTestTables()
+
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	persons := mgr.Table(TPerson)
+
+	if persons == nil {
+		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPerson)
+	}
+
+	addresses := mgr.Table(TAddressK)
+
+	if addresses == nil {
+		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TAddressK)
+	}
+
+	return mgr, persons, addresses, nil
+
 }

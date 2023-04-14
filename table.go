@@ -433,6 +433,11 @@ func (f *Field) SelectField() *SelectField {
 	return sf
 }
 
+func (f *Field) ToSqlString(d Dialect) string {
+	log.Fatal(NotImplemented)
+	return "Unimplemented"
+}
+
 func (f *Field) SelectFieldFuncAs(function, as string) *SelectField {
 	sf := f.SelectField()
 	sf.function = function

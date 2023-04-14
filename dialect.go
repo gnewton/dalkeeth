@@ -15,5 +15,6 @@ type Dialect interface {
 	JoinSql(*Join, string, ...*Field) error
 	ExtractTable(db *sql.DB, tableName string) (*Table, error)
 	SelectQuerySql(*SelectQuery) (string, error)
+	//FieldFunction(int, ...Field)
 	//DropTableSql(string)
 }

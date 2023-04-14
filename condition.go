@@ -157,8 +157,13 @@ type LHS interface {
 	string | *Field | *SelectField
 }
 
+type Numbers interface {
+	int | int64 | float64
+}
+
 type Values interface {
-	int | int64 | float64 | string | *Field
+	//int | int64 | float64 | string | *Field
+	Numbers | string | *Field
 }
 
 var None = []int{}

@@ -34,6 +34,7 @@ from: https://empire-db.apache.org/pages/home.html
 DBCommand cmd = context.createCommand()
    .select  (BRAND.NAME, MODEL.SPECIFICATION, MODEL.BASE_PRICE)
    .select  (SALES.MODEL_ID.count(), SALES.PRICE.avg())
+   .select (Count(SALES.PRICE)
    .select  (SALES.PRICE.avg().minus(MODEL.BASE_PRICE.avg()).round(2).as("DIFFERENCE"))
    .join    (MODEL.WMI, BRAND.WMI)
    .joinLeft(MODEL.ID, SALES.MODEL_ID, SALES.YEAR.is(2021))  // only year 2021

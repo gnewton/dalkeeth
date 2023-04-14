@@ -112,6 +112,7 @@ func (f *Field) Round() *AField {
 	return nil
 }
 
+// Conditions on fields (where, having)
 func (f *Field) Is() *Condition {
 	return nil
 }

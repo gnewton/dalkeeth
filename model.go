@@ -40,3 +40,40 @@ func (m *Model) AddTable(key string, tbl *Table) error {
 	m.tables = append(m.tables, tbl)
 	return nil
 }
+
+func (mdl *Model) AddForeignKey(tbl *Table, field string, foreignTbl *Table, foreignKeyField string) error {
+	if tbl == nil {
+		return fmt.Errorf("manager.AddForeignKey: Table is nil")
+	}
+
+	if foreignTbl == nil {
+		return fmt.Errorf("manager.AddForeignKey: Foreign table is nil")
+	}
+
+	if field == "" {
+		return fmt.Errorf("manager.AddForeignKey: Field name is empty")
+	}
+	if foreignKeyField == "" {
+		return fmt.Errorf("manager.AddForeignKey: foreignKeyField is empty")
+	}
+
+	if tbl.Field(field) == nil {
+		return fmt.Errorf("manager.AddForeignKey: Field %s does not exist in table %s", field, tbl.name)
+	}
+
+	if foreignTbl.Field(foreignKeyField) == nil {
+		return fmt.Errorf("manager.AddForeignKey: Foreign key field %s does not exist in table %s", foreignKeyField, foreignTbl.name)
+	}
+
+	f, ok := tbl.fieldsMap[field]
+	if !ok {
+		return fmt.Errorf("Field %s not found in table %s", field, tbl.name)
+	}
+
+	fk, ok := foreignTbl.fieldsMap[foreignKeyField]
+	if !ok {
+		return fmt.Errorf("Field %s not found in table %s", foreignKeyField, foreignTbl.name)
+	}
+
+	return tbl.addForeignKey(f, foreignTbl, fk)
+}

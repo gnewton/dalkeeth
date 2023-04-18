@@ -46,10 +46,12 @@ func TestManager_Table_UnknownString(t *testing.T) {
 
 func TestManager_AddTable_KeyEmptyString(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	model, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	mgr := NewManager()
 	defer mgr.Close()
 
 	newTable, err := NewTable("test1")
@@ -57,7 +59,7 @@ func TestManager_AddTable_KeyEmptyString(t *testing.T) {
 		t.Fatal(err)
 	}
 	// end setup
-	err = mgr.model.AddTable("", newTable)
+	err = model.AddTable("", newTable)
 	if err == nil {
 		t.Fatal(err)
 	}
@@ -65,14 +67,14 @@ func TestManager_AddTable_KeyEmptyString(t *testing.T) {
 
 func TestManager_AddTable_NilTable(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	model, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// end setup
 
-	err = mgr.model.AddTable("valid", nil) // FIXX
+	err = model.AddTable("valid", nil) // FIXX
 	if err == nil {
 		t.Fatal(err)
 	}
@@ -80,7 +82,7 @@ func TestManager_AddTable_NilTable(t *testing.T) {
 
 func TestManager_AddTable_KeyCollision(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	model, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +94,7 @@ func TestManager_AddTable_KeyCollision(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = mgr.model.AddTable(TPerson, newTable) // FIXXX
+	err = model.AddTable(TPerson, newTable) // FIXXX
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -100,13 +102,13 @@ func TestManager_AddTable_KeyCollision(t *testing.T) {
 
 func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	model, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// end setup
-
+	mgr := NewManagerWithModel(model)
 	mgr.dialect = nil
 
 	_, err = mgr.CreateTablesSQL()
@@ -117,13 +119,13 @@ func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
 
 func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	model, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// end setup
-
+	mgr := NewManagerWithModel(model)
 	mgr.dialect = nil
 
 	_, err = mgr.CreateTableIndexesSQL()
@@ -160,26 +162,26 @@ func Test_Manager_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
 
 func Test_Manager_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	model, err := initTestTables()
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	persons := mgr.Table(TPerson)
+	persons := model.Table(TPerson)
 
 	if persons == nil {
-		t.Log(mgr.model.tablesMap)
+		t.Log(model.tablesMap)
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
-	addresses := mgr.Table(TAddressK)
+	addresses := model.Table(TAddressK)
 
 	if addresses == nil {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TAddressK))
 	}
 
-	if mgr.AddForeignKey(persons, FId, addresses, "foo") == nil {
+	if model.AddForeignKey(persons, FId, addresses, "foo") == nil {
 		t.Fatal(fmt.Errorf("Failed identifying incorrect field"))
 	}
 }
@@ -460,11 +462,13 @@ func Test_Manager_Manager_Save_MissingNotNullValue(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	mgr, persons, _, err := addForeignKey_Setup()
+
+	model, persons, _, err := addForeignKey_Setup()
 
 	if err != nil {
 		t.Error(err)
 	}
+	mgr := NewManagerWithModel(model)
 	mgr.db = db
 	mgr.dialect = new(DialectSqlite3)
 
@@ -495,11 +499,13 @@ func Test_Manager_Manager_Save_MissingPK(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	mgr, persons, _, err := addForeignKey_Setup()
+	model, persons, _, err := addForeignKey_Setup()
 
 	if err != nil {
 		t.Error(err)
 	}
+
+	mgr := NewManagerWithModel(model)
 	mgr.db = db
 	mgr.dialect = new(DialectSqlite3)
 
@@ -671,25 +677,25 @@ func twoPersonRecords(persons *Table) ([]*Record, error) {
 func openTestDB() (*sql.DB, error) {
 	return sql.Open("sqlite3", ":memory:")
 }
-func addForeignKey_Setup() (*Manager, *Table, *Table, error) {
-	mgr, err := initTestTables()
+func addForeignKey_Setup() (*Model, *Table, *Table, error) {
+	model, err := initTestTables()
 
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	persons := mgr.Table(TPerson)
+	persons := model.Table(TPerson)
 
 	if persons == nil {
 		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPerson)
 	}
 
-	addresses := mgr.Table(TAddressK)
+	addresses := model.Table(TAddressK)
 
 	if addresses == nil {
 		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TAddressK)
 	}
 
-	return mgr, persons, addresses, nil
+	return model, persons, addresses, nil
 
 }

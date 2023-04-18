@@ -5,14 +5,16 @@ import (
 	"log"
 )
 
-func initTestTables() (*Manager, error) {
-	mgr := NewManager()
+func initTestTables() (*Model, error) {
+	//mgr := NewManager()
+	model := NewModel()
 
 	persons, err := NewTable(TPerson)
 	if err != nil {
 		return nil, err
 	}
-	mgr.model.AddTable(TPerson, persons) // FIXXXX
+	model.AddTable(TPerson, persons)
+
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +77,7 @@ func initTestTables() (*Manager, error) {
 		}}...); err != nil {
 		return nil, err
 	}
-	err = mgr.model.AddTable(TAddressK, addresses) // FIXXX
+	err = model.AddTable(TAddressK, addresses) // FIXXX
 	if err != nil {
 		return nil, err
 	}
@@ -103,11 +105,11 @@ func initTestTables() (*Manager, error) {
 		return nil, err
 	}
 
-	err = mgr.model.AddTable(JTPersonNameKey, person_address) // FIXXX
+	err = model.AddTable(JTPersonNameKey, person_address) // FIXXX
 	if err != nil {
 		return nil, err
 	}
-	err = mgr.AddForeignKey(person_address, FPersonId, persons, FId)
+	err = model.AddForeignKey(person_address, FPersonId, persons, FId)
 	if err != nil {
 		return nil, err
 	}
@@ -115,16 +117,17 @@ func initTestTables() (*Manager, error) {
 	if err != nil {
 		return nil, err
 	}
-	return mgr, nil
+	return model, nil
 }
 
 func initAndWriteTestTables() (*Manager, error) {
-	mgr, err := initTestTables()
+	model, err := initTestTables()
 
 	if err != nil {
 		return nil, err
 	}
 
+	mgr := NewManagerWithModel(model)
 	mgr.dialect = new(DialectSqlite3)
 	sqls, err := mgr.CreateTablesSQL()
 

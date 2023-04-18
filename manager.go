@@ -8,19 +8,26 @@ import (
 )
 
 type Manager struct {
-	db           *sql.DB
-	tx           *sql.Tx
-	tables       []*Table
-	tablesMap    map[string]*Table
-	selectLimits map[*Table]int64
-	dialect      Dialect
+	model *Model
+	db    *sql.DB
+	tx    *sql.Tx
+	//tables []*Table
+	//tablesMap     map[string]*Table
+	selectLimits  map[*Table]int64
+	dialect       Dialect
+	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
+}
+
+func NewManagerWithModel(model *Model) *Manager {
+	m := new(Manager)
+	m.model = model
+	m.selectLimits = make(map[*Table]int64)
+	return m
 }
 
 func NewManager() *Manager {
-	m := new(Manager)
-	m.tablesMap = make(map[string]*Table)
-	m.selectLimits = make(map[*Table]int64)
-	return m
+	model := NewModel()
+	return NewManagerWithModel(model)
 }
 
 func (m *Manager) Close() error {
@@ -31,29 +38,10 @@ func (m *Manager) Close() error {
 }
 
 func (m *Manager) Table(key string) *Table {
-	if t, ok := m.tablesMap[key]; ok {
-		return t
-	}
-	return nil
+	return m.model.Table(key)
 }
 
 // Key is mneumonic for table; Does not have to be the same as the table sql name.
-func (m *Manager) AddTable(key string, tbl *Table) error {
-	if key == "" {
-		return fmt.Errorf("Key is empty string")
-	}
-
-	if tbl == nil {
-		return fmt.Errorf("Table is nil")
-	}
-
-	if t, ok := m.tablesMap[key]; ok {
-		return fmt.Errorf("Key %s already occupied by table with name %s", key, t.name)
-	}
-	m.tablesMap[key] = tbl
-	m.tables = append(m.tables, tbl)
-	return nil
-}
 
 func (m *Manager) CreateTablesSQL() ([]string, error) {
 	if m.dialect == nil {
@@ -61,8 +49,8 @@ func (m *Manager) CreateTablesSQL() ([]string, error) {
 	}
 	var sql []string
 
-	for i := 0; i < len(m.tables); i++ {
-		s, err := m.dialect.CreateTableSql(m.tables[i])
+	for i := 0; i < len(m.model.tables); i++ {
+		s, err := m.dialect.CreateTableSql(m.model.tables[i])
 		if err != nil {
 			return nil, err
 		}
@@ -78,9 +66,9 @@ func (m *Manager) CreateTableIndexesSQL() ([]string, error) {
 	}
 	var sql []string
 
-	for i := 0; i < len(m.tables); i++ {
-		for j := 0; j < len(m.tables[i].indexes); j++ {
-			s, err := m.dialect.CreateTableIndexSql(m.tables[i].indexes[j])
+	for i := 0; i < len(m.model.tables); i++ {
+		for j := 0; j < len(m.model.tables[i].indexes); j++ {
+			s, err := m.dialect.CreateTableIndexSql(m.model.tables[i].indexes[j])
 			if err != nil {
 				return nil, err
 			}
@@ -167,6 +155,12 @@ func (m *Manager) save(r *Record) error {
 
 func (m *Manager) Update(r *Record) error {
 	return NotImplemented
+}
+
+func (m *Manager) GetNamed(tableName string, id int64) (*Record, error) {
+	// find tableName
+	// Get(tablename, id)
+	return nil, NotImplemented
 }
 
 func (m *Manager) Get(tbl *Table, id int64) (*Record, error) {
@@ -257,6 +251,8 @@ func (m *Manager) SaveTx(r *Record) error {
 	_, err = m.tx.Exec(saveSql, rawValues...)
 
 	if err != nil {
+		log.Println(saveSql)
+		log.Println(err)
 		return err
 	}
 	return nil

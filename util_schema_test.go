@@ -12,7 +12,7 @@ func initTestTables() (*Manager, error) {
 	if err != nil {
 		return nil, err
 	}
-	mgr.AddTable(TPerson, persons)
+	mgr.model.AddTable(TPerson, persons) // FIXXXX
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func initTestTables() (*Manager, error) {
 		}}...); err != nil {
 		return nil, err
 	}
-	err = mgr.AddTable(TAddressK, addresses)
+	err = mgr.model.AddTable(TAddressK, addresses) // FIXXX
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func initTestTables() (*Manager, error) {
 		return nil, err
 	}
 
-	err = mgr.AddTable(JTPersonNameKey, person_address)
+	err = mgr.model.AddTable(JTPersonNameKey, person_address) // FIXXX
 	if err != nil {
 		return nil, err
 	}

@@ -57,7 +57,7 @@ func TestManager_AddTable_KeyEmptyString(t *testing.T) {
 		t.Fatal(err)
 	}
 	// end setup
-	err = mgr.AddTable("", newTable)
+	err = mgr.model.AddTable("", newTable)
 	if err == nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestManager_AddTable_NilTable(t *testing.T) {
 
 	// end setup
 
-	err = mgr.AddTable("valid", nil)
+	err = mgr.model.AddTable("valid", nil) // FIXX
 	if err == nil {
 		t.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func TestManager_AddTable_KeyCollision(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = mgr.AddTable(TPerson, newTable)
+	err = mgr.model.AddTable(TPerson, newTable) // FIXXX
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -169,7 +169,7 @@ func Test_Manager_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 	persons := mgr.Table(TPerson)
 
 	if persons == nil {
-		t.Log(mgr.tablesMap)
+		t.Log(mgr.model.tablesMap)
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 

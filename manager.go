@@ -37,12 +37,11 @@ func (m *Manager) Close() error {
 	return m.db.Close()
 }
 
-func (m *Manager) Table(key string) *Table {
+func (m *Manager) Table(key string) (*Table, bool) {
 	return m.model.Table(key)
 }
 
 // Key is mneumonic for table; Does not have to be the same as the table sql name.
-
 func (m *Manager) CreateTablesSQL() ([]string, error) {
 	if m.dialect == nil {
 		return nil, fmt.Errorf("Dialect is nil")

@@ -16,11 +16,13 @@ func NewModel() *Model {
 	m.tablesMap = make(map[string]*Table)
 	return m
 }
-func (m *Model) Table(key string) *Table {
-	if t, ok := m.tablesMap[key]; ok {
-		return t
-	}
-	return nil
+func (m *Model) Table(key string) (*Table, bool) {
+
+	t, ok := m.tablesMap[key]
+	return t, ok
+	//}
+	//return nil
+	//return m.tablesMap[key]
 }
 
 // Key is mneumonic for table; Does not have to be the same as the table sql name.

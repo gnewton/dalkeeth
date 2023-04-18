@@ -21,8 +21,8 @@ func TestManager_Table_EmptyString(t *testing.T) {
 	// end setup
 
 	tName := ""
-	hosts := mgr.Table(tName)
-	if hosts != nil {
+	_, exists := mgr.Table(tName)
+	if exists {
 		t.Fatal(fmt.Errorf("Table with empty string key"))
 	}
 
@@ -37,8 +37,8 @@ func TestManager_Table_UnknownString(t *testing.T) {
 	// end setup
 
 	tName := "not-existing-table-foo"
-	hosts := mgr.Table(tName)
-	if hosts != nil {
+	_, exists := mgr.Table(tName)
+	if exists {
 		t.Fatal(fmt.Errorf("Table should not exist: %s", tName))
 	}
 
@@ -168,16 +168,16 @@ func Test_Manager_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 		t.Error(err)
 	}
 
-	persons := model.Table(TPerson)
+	persons, exists := model.Table(TPerson)
 
-	if persons == nil {
+	if !exists {
 		t.Log(model.tablesMap)
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
-	addresses := model.Table(TAddressK)
+	addresses, exists := model.Table(TAddressK)
 
-	if addresses == nil {
+	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TAddressK))
 	}
 
@@ -195,8 +195,8 @@ func Test_Manager_Manager_SaveTx(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons := mgr.Table(TPerson)
-	if persons == nil {
+	persons, exists := mgr.Table(TPerson)
+	if !exists {
 		t.Error(errors.New("Persons cannot be found: is nil"))
 	}
 
@@ -251,8 +251,8 @@ func Test_Manager_Manager_Save(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons := mgr.Table(TPerson)
-	if persons == nil {
+	persons, exists := mgr.Table(TPerson)
+	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
@@ -297,8 +297,8 @@ func Test_Manager_Manager_Batch(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons := mgr.Table(TPerson)
-	if persons == nil {
+	persons, exists := mgr.Table(TPerson)
+	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
@@ -396,8 +396,8 @@ func Test_Manager_Manager_BatchMany(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons := mgr.Table(TPerson)
-	if persons == nil {
+	persons, exists := mgr.Table(TPerson)
+	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
@@ -540,8 +540,8 @@ func Test_Manager_Manager_Get(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons := mgr.Table(TPerson)
-	if persons == nil {
+	persons, exists := mgr.Table(TPerson)
+	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
@@ -684,15 +684,15 @@ func addForeignKey_Setup() (*Model, *Table, *Table, error) {
 		return nil, nil, nil, err
 	}
 
-	persons := model.Table(TPerson)
+	persons, exists := model.Table(TPerson)
 
-	if persons == nil {
+	if !exists {
 		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPerson)
 	}
 
-	addresses := model.Table(TAddressK)
+	addresses, exists := model.Table(TAddressK)
 
-	if addresses == nil {
+	if !exists {
 		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TAddressK)
 	}
 

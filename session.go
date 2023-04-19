@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-type Manager struct {
+type Session struct {
 	model *Model
 	db    *sql.DB
 	tx    *sql.Tx
@@ -18,31 +18,31 @@ type Manager struct {
 	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
 }
 
-func NewManagerWithModel(model *Model) *Manager {
-	m := new(Manager)
+func NewSessionWithModel(model *Model) *Session {
+	m := new(Session)
 	m.model = model
 	m.selectLimits = make(map[*Table]int64)
 	return m
 }
 
-func NewManager() *Manager {
+func NewSession() *Session {
 	model := NewModel()
-	return NewManagerWithModel(model)
+	return NewSessionWithModel(model)
 }
 
-func (m *Manager) Close() error {
+func (m *Session) Close() error {
 	if m.db == nil {
 		return fmt.Errorf("Trying to close nil db")
 	}
 	return m.db.Close()
 }
 
-func (m *Manager) Table(key string) (*Table, bool) {
+func (m *Session) Table(key string) (*Table, bool) {
 	return m.model.Table(key)
 }
 
 // Key is mneumonic for table; Does not have to be the same as the table sql name.
-func (m *Manager) CreateTablesSQL() ([]string, error) {
+func (m *Session) CreateTablesSQL() ([]string, error) {
 	if m.dialect == nil {
 		return nil, fmt.Errorf("Dialect is nil")
 	}
@@ -59,7 +59,7 @@ func (m *Manager) CreateTablesSQL() ([]string, error) {
 	return sql, nil
 }
 
-func (m *Manager) CreateTableIndexesSQL() ([]string, error) {
+func (m *Session) CreateTableIndexesSQL() ([]string, error) {
 	if m.dialect == nil {
 		return nil, fmt.Errorf("Dialect is nil")
 	}
@@ -78,11 +78,11 @@ func (m *Manager) CreateTableIndexesSQL() ([]string, error) {
 	return sql, nil
 }
 
-func (m *Manager) BatchChannel(chunkSize int) (chan *Record, error) {
+func (m *Session) BatchChannel(chunkSize int) (chan *Record, error) {
 	return nil, NotImplemented
 }
 
-func (m *Manager) Batch(recs []*Record) error {
+func (m *Session) Batch(recs []*Record) error {
 	var err error
 	if m.tx == nil {
 		return errors.New("manager.Save: tx is nil")
@@ -111,21 +111,21 @@ func (m *Manager) Batch(recs []*Record) error {
 	return nil
 }
 
-func (m *Manager) save(r *Record) error {
+func (m *Session) save(r *Record) error {
 	return NotImplemented
 }
 
-func (m *Manager) Update(r *Record) error {
+func (m *Session) Update(r *Record) error {
 	return NotImplemented
 }
 
-func (m *Manager) GetNamed(tableName string, id int64) (*Record, error) {
+func (m *Session) GetNamed(tableName string, id int64) (*Record, error) {
 	// find tableName
 	// Get(tablename, id)
 	return nil, NotImplemented
 }
 
-func (m *Manager) Get(tbl *Table, id int64) (*Record, error) {
+func (m *Session) Get(tbl *Table, id int64) (*Record, error) {
 	if id < 0 {
 		return nil, errors.New("manager.Get: id < 0: ")
 	}
@@ -163,7 +163,7 @@ func (m *Manager) Get(tbl *Table, id int64) (*Record, error) {
 		v := rec.values[i]
 		//if v.isWanted {
 		actual(v)
-		log.Println("Manager", i)
+		log.Println("Session", i)
 		//}
 	}
 
@@ -172,7 +172,7 @@ func (m *Manager) Get(tbl *Table, id int64) (*Record, error) {
 }
 
 // Using db, not tx
-func (m *Manager) Save(r *Record) error {
+func (m *Session) Save(r *Record) error {
 	if r == nil {
 		return errors.New("manager.Save: record is nil")
 	}
@@ -195,7 +195,7 @@ func (m *Manager) Save(r *Record) error {
 	return nil
 }
 
-func (m *Manager) SaveTx(r *Record) error {
+func (m *Session) SaveTx(r *Record) error {
 	if m.tx == nil {
 		return errors.New("manager.Save: tx is nil")
 	}
@@ -220,7 +220,7 @@ func (m *Manager) SaveTx(r *Record) error {
 	return nil
 }
 
-func (m *Manager) Begin() error {
+func (m *Session) Begin() error {
 	if m.db == nil {
 		return errors.New("DB is nil")
 	}
@@ -239,7 +239,7 @@ func (m *Manager) Begin() error {
 	return nil
 }
 
-func (m *Manager) Commit() error {
+func (m *Session) Commit() error {
 	if m.tx == nil {
 		return errors.New("No transaction started")
 	}
@@ -263,6 +263,6 @@ func (m *Manager) Commit() error {
 	return nil
 }
 
-func (m *Manager) Rollback() error {
+func (m *Session) Rollback() error {
 	return nil
 }

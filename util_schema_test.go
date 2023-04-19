@@ -6,7 +6,7 @@ import (
 )
 
 func initTestTables() (*Model, error) {
-	//mgr := NewManager()
+	//mgr := NewSession()
 	model := NewModel()
 
 	persons, err := NewTable(TPerson)
@@ -120,14 +120,14 @@ func initTestTables() (*Model, error) {
 	return model, nil
 }
 
-func initAndWriteTestTables() (*Manager, error) {
+func initAndWriteTestTables() (*Session, error) {
 	model, err := initTestTables()
 
 	if err != nil {
 		return nil, err
 	}
 
-	mgr := NewManagerWithModel(model)
+	mgr := NewSessionWithModel(model)
 	mgr.dialect = new(DialectSqlite3)
 	sqls, err := mgr.CreateTablesSQL()
 

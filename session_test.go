@@ -12,7 +12,7 @@ import (
 
 var ShouldHaveFailed = errors.New("Should have failed.")
 
-func TestManager_Table_EmptyString(t *testing.T) {
+func TestSession_Table_EmptyString(t *testing.T) {
 	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
@@ -28,7 +28,7 @@ func TestManager_Table_EmptyString(t *testing.T) {
 
 }
 
-func TestManager_Table_UnknownString(t *testing.T) {
+func TestSession_Table_UnknownString(t *testing.T) {
 	setupTest()
 	mgr, err := initTestTables()
 	if err != nil {
@@ -44,14 +44,14 @@ func TestManager_Table_UnknownString(t *testing.T) {
 
 }
 
-func TestManager_AddTable_KeyEmptyString(t *testing.T) {
+func TestSession_AddTable_KeyEmptyString(t *testing.T) {
 	setupTest()
 	model, err := initTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	mgr := NewManager()
+	mgr := NewSession()
 	defer mgr.Close()
 
 	newTable, err := NewTable("test1")
@@ -65,7 +65,7 @@ func TestManager_AddTable_KeyEmptyString(t *testing.T) {
 	}
 }
 
-func TestManager_AddTable_NilTable(t *testing.T) {
+func TestSession_AddTable_NilTable(t *testing.T) {
 	setupTest()
 	model, err := initTestTables()
 	if err != nil {
@@ -80,7 +80,7 @@ func TestManager_AddTable_NilTable(t *testing.T) {
 	}
 }
 
-func TestManager_AddTable_KeyCollision(t *testing.T) {
+func TestSession_AddTable_KeyCollision(t *testing.T) {
 	setupTest()
 	model, err := initTestTables()
 	if err != nil {
@@ -100,7 +100,7 @@ func TestManager_AddTable_KeyCollision(t *testing.T) {
 	}
 }
 
-func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
+func TestSession_CreateTablesSQL_NilDialect(t *testing.T) {
 	setupTest()
 	model, err := initTestTables()
 	if err != nil {
@@ -108,7 +108,7 @@ func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
 	}
 
 	// end setup
-	mgr := NewManagerWithModel(model)
+	mgr := NewSessionWithModel(model)
 	mgr.dialect = nil
 
 	_, err = mgr.CreateTablesSQL()
@@ -117,7 +117,7 @@ func TestManager_CreateTablesSQL_NilDialect(t *testing.T) {
 	}
 }
 
-func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
+func TestSession_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	setupTest()
 	model, err := initTestTables()
 	if err != nil {
@@ -125,7 +125,7 @@ func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	}
 
 	// end setup
-	mgr := NewManagerWithModel(model)
+	mgr := NewSessionWithModel(model)
 	mgr.dialect = nil
 
 	_, err = mgr.CreateTableIndexesSQL()
@@ -134,12 +134,12 @@ func TestManager_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	}
 }
 
-func TestManager_AddForeignKey_NilTable(t *testing.T) {
+func TestSession_AddForeignKey_NilTable(t *testing.T) {
 	setupTest()
 	//t.Fatal(NotImplemented)
 }
 
-func Test_ManagerInitTables2(t *testing.T) {
+func Test_SessionInitTables2(t *testing.T) {
 	setupTest()
 	_, err := initTestTables()
 	if err != nil {
@@ -147,7 +147,7 @@ func Test_ManagerInitTables2(t *testing.T) {
 	}
 }
 
-func Test_Manager_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
+func Test_Session_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
 	setupTest()
 	mgr, persons, addresses, err := addForeignKey_Setup()
 
@@ -160,7 +160,7 @@ func Test_Manager_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
 	}
 }
 
-func Test_Manager_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
+func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 	setupTest()
 	model, err := initTestTables()
 
@@ -186,7 +186,7 @@ func Test_Manager_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 	}
 }
 
-func Test_Manager_Manager_SaveTx(t *testing.T) {
+func Test_Session_Session_SaveTx(t *testing.T) {
 	setupTest()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	mgr, err := initAndWriteTestTables()
@@ -243,7 +243,7 @@ func Test_Manager_Manager_SaveTx(t *testing.T) {
 
 }
 
-func Test_Manager_Manager_Save(t *testing.T) {
+func Test_Session_Session_Save(t *testing.T) {
 	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
@@ -289,7 +289,7 @@ func Test_Manager_Manager_Save(t *testing.T) {
 	}
 }
 
-func Test_Manager_Manager_Batch(t *testing.T) {
+func Test_Session_Session_Batch(t *testing.T) {
 	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
@@ -341,9 +341,9 @@ func Test_Manager_Manager_Batch(t *testing.T) {
 	}
 }
 
-func Test_Manager_Manager_Begin_DBNil(t *testing.T) {
+func Test_Session_Session_Begin_DBNil(t *testing.T) {
 	setupTest()
-	mgr := NewManager()
+	mgr := NewSession()
 
 	err := mgr.Begin()
 	if err == nil {
@@ -351,7 +351,7 @@ func Test_Manager_Manager_Begin_DBNil(t *testing.T) {
 	}
 }
 
-func Test_Manager_Manager_Begin_DoubleTx(t *testing.T) {
+func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
@@ -372,7 +372,7 @@ func Test_Manager_Manager_Begin_DoubleTx(t *testing.T) {
 	log.Println(err)
 }
 
-func Test_Manager_Manager_Commit_NilTx(t *testing.T) {
+func Test_Session_Session_Commit_NilTx(t *testing.T) {
 	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
@@ -388,7 +388,7 @@ func Test_Manager_Manager_Commit_NilTx(t *testing.T) {
 	log.Println(err)
 }
 
-func Test_Manager_Manager_BatchMany(t *testing.T) {
+func Test_Session_Session_BatchMany(t *testing.T) {
 	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {
@@ -456,7 +456,7 @@ func contains(db *sql.DB, tableName string, id int64) (bool, error) {
 	return value == id, nil
 }
 
-func Test_Manager_Manager_Save_MissingNotNullValue(t *testing.T) {
+func Test_Session_Session_Save_MissingNotNullValue(t *testing.T) {
 	setupTest()
 	db, err := openTestDB()
 	if err != nil {
@@ -468,7 +468,7 @@ func Test_Manager_Manager_Save_MissingNotNullValue(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	mgr := NewManagerWithModel(model)
+	mgr := NewSessionWithModel(model)
 	mgr.db = db
 	mgr.dialect = new(DialectSqlite3)
 
@@ -493,7 +493,7 @@ func Test_Manager_Manager_Save_MissingNotNullValue(t *testing.T) {
 	}
 }
 
-func Test_Manager_Manager_Save_MissingPK(t *testing.T) {
+func Test_Session_Session_Save_MissingPK(t *testing.T) {
 	setupTest()
 	db, err := openTestDB()
 	if err != nil {
@@ -505,7 +505,7 @@ func Test_Manager_Manager_Save_MissingPK(t *testing.T) {
 		t.Error(err)
 	}
 
-	mgr := NewManagerWithModel(model)
+	mgr := NewSessionWithModel(model)
 	mgr.db = db
 	mgr.dialect = new(DialectSqlite3)
 
@@ -532,7 +532,7 @@ func Test_Manager_Manager_Save_MissingPK(t *testing.T) {
 	}
 }
 
-func Test_Manager_Manager_Get(t *testing.T) {
+func Test_Session_Session_Get(t *testing.T) {
 	setupTest()
 	mgr, err := initAndWriteTestTables()
 	if err != nil {

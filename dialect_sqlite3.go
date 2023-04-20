@@ -449,3 +449,11 @@ func (d *DialectSqlite3) makeOrderByFields(fields []*SelectField) string {
 func (d *DialectSqlite3) ArbitraryFunc(string, []any) (string, error) {
 	return "", NotImplemented
 }
+
+func (d *DialectSqlite3) FunctionFieldSql(ff FunctionField) string {
+	switch ff.sqlFunction{
+		case 
+	}
+	log.Fatal(NotImplemented)
+	return ""
+}

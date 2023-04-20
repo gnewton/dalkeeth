@@ -123,3 +123,31 @@ func sqlFieldType(f *Field) string {
 	return s
 
 }
+
+// Used in queries; functions
+
+func (f *Field) Count() AField {
+	countField := NewFunctionField(COUNT, f)
+	return countField
+}
+
+func (f *Field) Avg() AField {
+	return nil
+}
+
+func (f *Field) Round() AField {
+	return nil
+}
+
+// Conditions on fields (where, having)
+func (f *Field) Is() *Condition {
+	return nil
+}
+
+func (f *Field) In(in ...any) *Condition {
+	return nil
+}
+
+func (f *Field) GreaterThan(v any) *Condition {
+	return nil
+}

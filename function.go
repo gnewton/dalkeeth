@@ -1,10 +1,10 @@
 package dalkeeth
 
-type SQLFunction int
+type SQLFunctionId int
 
 const (
 	//Aggregate functions - https://www.sqlite.org/lang_aggfunc.html#aggfunclist
-	AVG SQLFunction = iota
+	AVG SQLFunctionId = iota
 	// count(*)
 	COUNT //(X)
 	// group_concat(X)
@@ -119,7 +119,7 @@ const (
 
 )
 
-var sqlFunctionInfo = map[SQLFunction]int{
+var sqlFunctionNArgs = map[SQLFunctionId]int{
 	AVG:      1,
 	COUNT:    3,
 	COALESCE: 1,
@@ -128,17 +128,18 @@ var sqlFunctionInfo = map[SQLFunction]int{
 }
 
 type FunctionField struct {
-	sqlFunction SQLFunction
-	fields      []AField
+	sqlFunctionId SQLFunctionId
+	fields        []AField
 }
 
 func (ff FunctionField) ToSqlString(d Dialect) string {
 	return d.FunctionFieldSql(ff)
 }
 
-func NewFunctionField(sf SQLFunction, fields ...*Field) AField {
+func NewFunctionField(sf SQLFunctionId, fields ...AField) AField {
 	ff := FunctionField{
-		sqlFunction: sf,
+		sqlFunctionId: sf,
+		fields:        fields,
 	}
 	return ff
 }

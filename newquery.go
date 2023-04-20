@@ -1,9 +1,5 @@
 package dalkeeth
 
-type AField interface {
-	ToSqlString(Dialect) string
-}
-
 type Join2 struct {
 	f1, f2 *Field
 }

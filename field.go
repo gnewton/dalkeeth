@@ -8,6 +8,18 @@ import (
 	"strconv"
 )
 
+type AField interface {
+	ToSqlString(Dialect) string
+}
+
+type StringField struct {
+	field string
+}
+
+func (sf *StringField) ToSqlString(d Dialect) string {
+	return sf.field
+}
+
 type FieldType int
 
 const (

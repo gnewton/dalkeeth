@@ -450,10 +450,37 @@ func (d *DialectSqlite3) ArbitraryFunc(string, []any) (string, error) {
 	return "", NotImplemented
 }
 
+var sqlFunctionString = map[SQLFunctionId]string{
+	AVG:      "AVG",
+	COUNT:    "COUNT",
+	COALESCE: "COALESCE",
+	MAX:      "MAX",
+	RANDOM:   "RANDOM",
+}
+
 func (d *DialectSqlite3) FunctionFieldSql(ff FunctionField) string {
-	switch ff.sqlFunction{
-		case 
+	numExpectedFields, exists := sqlFunctionNArgs[ff.sqlFunctionId]
+	if !exists {
+		log.Fatal(fmt.Errorf("FunctionField does not exist: %d   in sqlFunctionId map", ff.sqlFunctionId))
 	}
-	log.Fatal(NotImplemented)
-	return ""
+	if numExpectedFields != len(ff.fields) {
+		log.Fatal(fmt.Errorf("NumExpectedFields %d for functionid %d does not match acting num fields %d", numExpectedFields, ff.sqlFunctionId, len(ff.fields)))
+	}
+
+	funcName, exists := sqlFunctionString[ff.sqlFunctionId]
+	if !exists {
+		log.Fatal(fmt.Errorf("FunctionField does not exist: %d in sqlFunctionString map", ff.sqlFunctionId))
+	}
+
+	f := funcName + "("
+
+	for i := 0; i < len(ff.fields); i++ {
+		if i > 0 {
+			f += ","
+		}
+		f += ff.fields[i].ToSqlString(d)
+	}
+	f += ")"
+
+	return f
 }

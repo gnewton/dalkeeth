@@ -1,0 +1,36 @@
+
+
+
+Query q := model.Query()
+
+q.Get(int64)
+q.Put(record)
+q.Update(record)
+q.Delete(int64)
+
+q.DeleteWhere(*Condition)
+
+q.Select("age"...)
+q.SelectAs("age", "AGE"...)
+
+q.SelectM(model.Table("person").Field("age")...)
+q.SelectMAs(model.Table("person").Field("age"), "AGE")
+
+q.Where/Having("age=43")
+q.Where/Having("name=\"mm\"")
+
+// *Condition
+q.Where/HavingM(model.Table("person").Field("age").Equals(42), model.Table("person").Field("name").Equals(42))
+// *Condition
+q.Where/HavingM(ageField.Equals(42), nameField.Equals(42))
+// *Condition
+q.ComplexWhere/HavingM(Or().And().Not()...)
+
+
+
+
+q.GroupBy("age"...)
+q.GroupByM(model.Table("person").Field("age")...)
+
+q.Join("table1", "field1", "table2", field2")
+q.NamedJoin("person-place")

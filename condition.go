@@ -163,7 +163,7 @@ type Numbers interface {
 
 type Values interface {
 	//int | int64 | float64 | string | *Field
-	Numbers | string | *Field
+	Numbers | string | *Field | *StringField
 }
 
 var None = []int{}

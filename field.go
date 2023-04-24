@@ -4,20 +4,19 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 )
 
 type AField interface {
-	ToSqlString(Dialect) string
+	ToSqlString(Dialect) (string, error)
 }
 
 type StringField struct {
-	field string
+	fieldName string
 }
 
-func (sf *StringField) ToSqlString(d Dialect) string {
-	return sf.field
+func (sf StringField) ToSqlString(d Dialect) (string, error) {
+	return sf.fieldName, nil
 }
 
 type FieldType int
@@ -48,6 +47,15 @@ type Field struct {
 	table        *Table
 }
 
+type FieldAs struct {
+	field *Field
+	alias string
+}
+
+func (fa *FieldAs) ToSqlString(d Dialect) (string, error) {
+	return d.FieldAsSql(fa)
+}
+
 func validTypeForField(v any, f *Field) error {
 
 	switch t := v.(type) {
@@ -69,6 +77,7 @@ func validTypeForField(v any, f *Field) error {
 
 	return nil
 }
+
 func NewField(name string, fieldType FieldType, pk, indexed, notNull bool, length int) *Field {
 	f := new(Field)
 	f.name = name
@@ -85,9 +94,8 @@ func (f *Field) SelectField() *SelectField {
 	return sf
 }
 
-func (f *Field) ToSqlString(d Dialect) string {
-	log.Fatal(NotImplemented)
-	return "Unimplemented"
+func (f *Field) ToSqlString(d Dialect) (string, error) {
+	return f.name, nil
 }
 
 func (f *Field) SelectFieldFuncAs(function, as string) *SelectField {
@@ -136,11 +144,14 @@ func sqlFieldType(f *Field) string {
 
 }
 
-// Used in queries; functions
+func (f *Field) As(alias string) AField {
+	return new(FieldAs)
+}
+
+// SQL functions used in queries
 
 func (f *Field) Count() AField {
-	countField := NewFunctionField(COUNT, f)
-	return countField
+	return NewFunctionField(COUNT, f)
 }
 
 func (f *Field) Avg() AField {
@@ -152,14 +163,19 @@ func (f *Field) Round() AField {
 }
 
 // Conditions on fields (where, having)
-func (f *Field) Is() *Condition {
-	return nil
-}
 
 func (f *Field) In(in ...any) *Condition {
 	return nil
 }
 
-func (f *Field) GreaterThan(v any) *Condition {
+func (f *Field) Is(v any) *Condition {
+	return nil
+}
+
+func (f *Field) IsGreaterThan(v any) *Condition {
+	return nil
+}
+
+func (f *Field) IsLessThan(v any) Condition {
 	return nil
 }

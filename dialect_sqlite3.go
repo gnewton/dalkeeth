@@ -458,17 +458,21 @@ var sqlFunctionString = map[SQLFunctionId]string{
 	RANDOM:   "RANDOM",
 }
 
-func (d *DialectSqlite3) FunctionFieldSql(ff FunctionField) string {
-	numExpectedFields, exists := sqlFunctionNArgs[ff.sqlFunctionId]
-	if !exists {
+func (d *DialectSqlite3) FunctionFieldSql(ff FunctionField) (string, error) {
+	if true {
+		return "HEOOO", nil
+	}
+	var numExpectedFields int
+	var exists bool
+	if numExpectedFields, exists = sqlFunctionNArgs[ff.sqlFunctionId]; !exists {
 		log.Fatal(fmt.Errorf("FunctionField does not exist: %d   in sqlFunctionId map", ff.sqlFunctionId))
 	}
 	if numExpectedFields != len(ff.fields) {
 		log.Fatal(fmt.Errorf("NumExpectedFields %d for functionid %d does not match acting num fields %d", numExpectedFields, ff.sqlFunctionId, len(ff.fields)))
 	}
 
-	funcName, exists := sqlFunctionString[ff.sqlFunctionId]
-	if !exists {
+	var funcName string
+	if funcName, exists = sqlFunctionString[ff.sqlFunctionId]; !exists {
 		log.Fatal(fmt.Errorf("FunctionField does not exist: %d in sqlFunctionString map", ff.sqlFunctionId))
 	}
 
@@ -478,9 +482,29 @@ func (d *DialectSqlite3) FunctionFieldSql(ff FunctionField) string {
 		if i > 0 {
 			f += ","
 		}
-		f += ff.fields[i].ToSqlString(d)
+		s, err := ff.fields[i].ToSqlString(d)
+		if err != nil {
+			return "", err
+		}
+		f += s
 	}
 	f += ")"
 
-	return f
+	return f, nil
+}
+
+func (d *DialectSqlite3) FieldAsSql(fa *FieldAs) (string, error) {
+	if fa == nil {
+		return "", errors.New("FieldAs is nil")
+	}
+
+	if fa.field == nil {
+		return "", errors.New("FieldAs.field is nil")
+	}
+
+	if len(fa.field.name) == 0 {
+		return "", errors.New("FieldAs.field.name is empty string")
+	}
+
+	return fa.field.name + " AS " + fa.alias, nil
 }

@@ -132,7 +132,7 @@ type FunctionField struct {
 	fields        []AField
 }
 
-func (ff FunctionField) ToSqlString(d Dialect) string {
+func (ff FunctionField) ToSqlString(d Dialect) (string, error) {
 	return d.FunctionFieldSql(ff)
 }
 
@@ -141,6 +141,7 @@ func NewFunctionField(sf SQLFunctionId, fields ...AField) AField {
 		sqlFunctionId: sf,
 		fields:        fields,
 	}
+
 	return ff
 }
 

@@ -15,21 +15,21 @@ func (ord Ordering) String() string {
 type Fields []*Field
 
 type SelectQuery struct {
-	distinct    bool
-	fields      []*SelectField
-	pks         []int64
-	where       Condition
-	groupBy     []*Field
-	having      Condition
-	limit       int64
-	offset      int64
-	orderBy     []*SelectField
-	ordering    Ordering
-	validated   bool
-	selectLimit int64
+	distinct       bool
+	fields         []*Field
+	pks            []int64
+	where          Condition
+	groupBy        []*Field
+	having         Condition
+	limit          int64
+	offset         int64
+	orderByFields  []*FieldOrdered
+	globalOrdering Ordering
+	validated      bool
+	selectLimit    int64
 }
 
-type SelectField struct {
+type FieldOrdered struct {
 	Field
 	function string
 	as       string
@@ -47,6 +47,7 @@ func (q *SelectQuery) Validate() error {
 	return nil
 }
 
+// ////////////////////////////////////
 // Run
 func (q *SelectQuery) First() (*Record, error) {
 	return nil, nil
@@ -69,3 +70,5 @@ func (q *SelectQuery) Pluck() ([]any, error) {
 
 type Rows struct { //temporary
 }
+
+//////////////////// ex2 NEW

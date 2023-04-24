@@ -30,26 +30,26 @@ func NewSession() *Session {
 	return NewSessionWithModel(model)
 }
 
-func (m *Session) Close() error {
-	if m.db == nil {
+func (sess *Session) Close() error {
+	if sess.db == nil {
 		return fmt.Errorf("Trying to close nil db")
 	}
-	return m.db.Close()
+	return sess.db.Close()
 }
 
-func (m *Session) Table(key string) (*Table, bool) {
-	return m.model.Table(key)
+func (sess *Session) Table(key string) (*Table, bool) {
+	return sess.model.Table(key)
 }
 
 // Key is mneumonic for table; Does not have to be the same as the table sql name.
-func (m *Session) CreateTablesSQL() ([]string, error) {
-	if m.dialect == nil {
+func (sess *Session) CreateTablesSQL() ([]string, error) {
+	if sess.dialect == nil {
 		return nil, fmt.Errorf("Dialect is nil")
 	}
 	var sql []string
 
-	for i := 0; i < len(m.model.tables); i++ {
-		s, err := m.dialect.CreateTableSql(m.model.tables[i])
+	for i := 0; i < len(sess.model.tables); i++ {
+		s, err := sess.dialect.CreateTableSql(sess.model.tables[i])
 		if err != nil {
 			return nil, err
 		}
@@ -59,15 +59,15 @@ func (m *Session) CreateTablesSQL() ([]string, error) {
 	return sql, nil
 }
 
-func (m *Session) CreateTableIndexesSQL() ([]string, error) {
-	if m.dialect == nil {
+func (sess *Session) CreateTableIndexesSQL() ([]string, error) {
+	if sess.dialect == nil {
 		return nil, fmt.Errorf("Dialect is nil")
 	}
 	var sql []string
 
-	for i := 0; i < len(m.model.tables); i++ {
-		for j := 0; j < len(m.model.tables[i].indexes); j++ {
-			s, err := m.dialect.CreateTableIndexSql(m.model.tables[i].indexes[j])
+	for i := 0; i < len(sess.model.tables); i++ {
+		for j := 0; j < len(sess.model.tables[i].indexes); j++ {
+			s, err := sess.dialect.CreateTableIndexSql(sess.model.tables[i].indexes[j])
 			if err != nil {
 				return nil, err
 			}
@@ -78,22 +78,22 @@ func (m *Session) CreateTableIndexesSQL() ([]string, error) {
 	return sql, nil
 }
 
-func (m *Session) BatchChannel(chunkSize int) (chan *Record, error) {
+func (sess *Session) BatchChannel(chunkSize int) (chan *Record, error) {
 	return nil, NotImplemented
 }
 
-func (m *Session) Batch(recs []*Record) error {
+func (sess *Session) Batch(recs []*Record) error {
 	var err error
-	if m.tx == nil {
+	if sess.tx == nil {
 		return errors.New("manager.Save: tx is nil")
 	}
 
-	saveSql, err := m.dialect.SaveSql(recs[0])
+	saveSql, err := sess.dialect.SaveSql(recs[0])
 	if err != nil {
 		return err
 	}
 
-	stmt, err := m.tx.Prepare(saveSql)
+	stmt, err := sess.tx.Prepare(saveSql)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,34 +111,45 @@ func (m *Session) Batch(recs []*Record) error {
 	return nil
 }
 
-func (m *Session) save(r *Record) error {
+func (sess *Session) save(r *Record) error {
 	return NotImplemented
 }
 
-func (m *Session) Update(r *Record) error {
+func (sess *Session) Update(r *Record) error {
 	return NotImplemented
 }
 
-func (m *Session) GetNamed(tableName string, id int64) (*Record, error) {
+func (sess *Session) GetNamed(tableName string, id int64) (*Record, error) {
 	// find tableName
 	// Get(tablename, id)
 	return nil, NotImplemented
 }
 
-func (m *Session) Get(tbl *Table, id int64) (*Record, error) {
+func (sess *Session) GetS(tblName string, id int64) (*Record, error) {
+	var tbl *Table
+	var ok bool
+
+	if tbl, ok = sess.model.tablesMap[tblName]; !ok {
+		return nil, fmt.Errorf("Unknown table name:[%s]", tblName)
+	}
+
+	return sess.Get(tbl, id)
+}
+
+func (sess *Session) Get(tbl *Table, id int64) (*Record, error) {
 	if id < 0 {
 		return nil, errors.New("manager.Get: id < 0: ")
 	}
-	if m.db == nil {
+	if sess.db == nil {
 		return nil, errors.New("manager.Get: db is nil")
 	}
-	if m.dialect == nil {
+	if sess.dialect == nil {
 		return nil, errors.New("manager.Save: dialext is nil")
 	}
 
 	rec := tbl.NewRecord()
 
-	query, err := m.dialect.GetSingleRecordSql(rec, id)
+	query, err := sess.dialect.GetSingleRecordSql(rec, id)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +161,7 @@ func (m *Session) Get(tbl *Table, id int64) (*Record, error) {
 	}
 	log.Println("-------------------rawWantedValues", values)
 
-	row := m.db.QueryRow(query)
+	row := sess.db.QueryRow(query)
 	err = row.Scan(values...)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -172,14 +183,14 @@ func (m *Session) Get(tbl *Table, id int64) (*Record, error) {
 }
 
 // Using db, not tx
-func (m *Session) Save(r *Record) error {
+func (sess *Session) Save(r *Record) error {
 	if r == nil {
 		return errors.New("manager.Save: record is nil")
 	}
-	if m.dialect == nil {
+	if sess.dialect == nil {
 		return errors.New("manager.Save: dialext is nil")
 	}
-	saveSql, err := m.dialect.SaveSql(r)
+	saveSql, err := sess.dialect.SaveSql(r)
 	if err != nil {
 		return err
 	}
@@ -187,7 +198,7 @@ func (m *Session) Save(r *Record) error {
 	log.Println(saveSql)
 
 	rawValues := rawValues(r.values)
-	_, err = m.db.Exec(saveSql, rawValues...)
+	_, err = sess.db.Exec(saveSql, rawValues...)
 
 	if err != nil {
 		return err
@@ -195,14 +206,14 @@ func (m *Session) Save(r *Record) error {
 	return nil
 }
 
-func (m *Session) SaveTx(r *Record) error {
-	if m.tx == nil {
+func (sess *Session) SaveTx(r *Record) error {
+	if sess.tx == nil {
 		return errors.New("manager.Save: tx is nil")
 	}
-	if m.dialect == nil {
+	if sess.dialect == nil {
 		return errors.New("manager.Save: dialext is nil")
 	}
-	saveSql, err := m.dialect.SaveSql(r)
+	saveSql, err := sess.dialect.SaveSql(r)
 	if err != nil {
 		return err
 	}
@@ -210,7 +221,7 @@ func (m *Session) SaveTx(r *Record) error {
 	log.Println(saveSql)
 
 	rawValues := rawValues(r.values)
-	_, err = m.tx.Exec(saveSql, rawValues...)
+	_, err = sess.tx.Exec(saveSql, rawValues...)
 
 	if err != nil {
 		log.Println(saveSql)
@@ -220,17 +231,17 @@ func (m *Session) SaveTx(r *Record) error {
 	return nil
 }
 
-func (m *Session) Begin() error {
-	if m.db == nil {
+func (sess *Session) Begin() error {
+	if sess.db == nil {
 		return errors.New("DB is nil")
 	}
 
-	if m.tx != nil {
+	if sess.tx != nil {
 		return errors.New("Already in transaction")
 	}
 	var err error
 
-	m.tx, err = m.db.Begin()
+	sess.tx, err = sess.db.Begin()
 
 	if err != nil {
 		return err
@@ -239,20 +250,20 @@ func (m *Session) Begin() error {
 	return nil
 }
 
-func (m *Session) Commit() error {
-	if m.tx == nil {
+func (sess *Session) Commit() error {
+	if sess.tx == nil {
 		return errors.New("No transaction started")
 	}
 
 	defer func() {
-		m.tx = nil
+		sess.tx = nil
 	}()
 
-	err := m.tx.Commit()
+	err := sess.tx.Commit()
 	if err != nil {
 		log.Println("Commit error")
 		log.Println(err)
-		rollbackErr := m.tx.Rollback()
+		rollbackErr := sess.tx.Rollback()
 		if rollbackErr != nil {
 			log.Println("Rollback error")
 			log.Println(rollbackErr)
@@ -263,6 +274,18 @@ func (m *Session) Commit() error {
 	return nil
 }
 
-func (m *Session) Rollback() error {
+func (sess *Session) Rollback() error {
 	return nil
+}
+
+func (sess *Session) NewSelectQuery() *SelectQuery {
+	q := SelectQuery{
+		fields: make([]*Field, 0),
+	}
+	return &q
+}
+
+func (sess *Session) Exists(t *Table, id int64) (bool, error) {
+	return recordExists(sess.db, t.name, id)
+
 }

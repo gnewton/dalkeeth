@@ -1,21 +1,33 @@
 
 
+session sess
+
 
 Query q := model.Query()
 
-q.Get(int64)
-q.Put(record)
-q.Update(record)
-q.Delete(int64)
+sess.Get(table, int64) // DONE
+sess.GetS("foo", int64)
 
-q.DeleteWhere(*Condition)
+sess.Save(record) // DONE
+sess.Exists(table, int64) //DONE
+sess.Update(record)
+sess.Delete(table,int64)
+sess.DeleteS(table,int64)
 
-q.Select("age"...)
-q.SelectAs("age", "AGE"...)
+sess.DeleteWhere(table, *Condition)
+sess.DeleteWhereS("foo", *Condition)
 
-q.SelectM(model.Table("person").Field("age")...)
-q.SelectMAs(model.Table("person").Field("age"), "AGE")
+sess.UpdateWhere(table, *Condition, *Values...)
+sess.UpdateWhereS(table, *Condition, *Values...)
 
+q.SelectS("age"...)
+q.Select("age", "AGE"...)
+q.Select(model.Table("person").Field("age")...)
+q.Select(model.Table("person").Field("age").As("BigAge"))
+
+q.From(table1..)
+
+//Simple
 q.Where/Having("age=43")
 q.Where/Having("name=\"mm\"")
 

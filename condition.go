@@ -154,7 +154,7 @@ type Condition interface {
 }
 
 type LHS interface {
-	string | *Field | *SelectField
+	string | *Field
 }
 
 type Numbers interface {

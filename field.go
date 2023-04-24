@@ -89,21 +89,8 @@ func NewField(name string, fieldType FieldType, pk, indexed, notNull bool, lengt
 	return f
 }
 
-func (f *Field) SelectField() *SelectField {
-	sf := &SelectField{Field: *f}
-	return sf
-}
-
 func (f *Field) ToSqlString(d Dialect) (string, error) {
 	return f.name, nil
-}
-
-func (f *Field) SelectFieldFuncAs(function, as string) *SelectField {
-	sf := f.SelectField()
-	sf.function = function
-	sf.as = as
-
-	return sf
 }
 
 func (f *Field) CreateFieldSql() (string, error) {

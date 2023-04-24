@@ -77,10 +77,10 @@ func (d *DialectSqlite3) SelectQuerySql(q *SelectQuery) (string, error) {
 		s += " OFFSET " + strconv.FormatInt(q.offset, 10)
 	}
 
-	if q.ordering != NoOrdering {
+	if q.globalOrdering != NoOrdering {
 		s += "ORDER BY "
-		s += d.makeOrderByFields(q.orderBy)
-		if q.ordering == ASC {
+		s += d.makeOrderByFields(q.orderByFields)
+		if q.globalOrdering == ASC {
 			s += " ASC"
 		} else {
 			s += " DESC"
@@ -385,7 +385,7 @@ func (d *DialectSqlite3) JoinSql(*Join, string, ...*Field) error {
 	return NotImplemented
 }
 
-func (d *DialectSqlite3) makeFields(fields []*SelectField) string {
+func (d *DialectSqlite3) makeFields(fields []*Field) string {
 	if len(fields) == 0 {
 		return ""
 	}
@@ -400,6 +400,7 @@ func (d *DialectSqlite3) makeFields(fields []*SelectField) string {
 }
 
 func (d *DialectSqlite3) makePks(pks []int64) string {
+	log.Fatal("makePks")
 	return "fail"
 }
 
@@ -425,7 +426,7 @@ func (d *DialectSqlite3) makeHaving(cond Condition) string {
 const SPACE = " "
 const COMMA_SPACE = ", "
 
-func (d *DialectSqlite3) makeOrderByFields(fields []*SelectField) string {
+func (d *DialectSqlite3) makeOrderByFields(fields []*FieldOrdered) string {
 	if len(fields) == 0 {
 		return ""
 	}

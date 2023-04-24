@@ -134,10 +134,10 @@ func TestSession_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	}
 }
 
-func TestSession_AddForeignKey_NilTable(t *testing.T) {
-	setupTest()
-	//t.Fatal(NotImplemented)
-}
+//func TestSession_AddForeignKey_NilTable(t *testing.T) {
+//	setupTest()
+//	t.Fatal(NotImplemented)
+//}
 
 func Test_SessionInitTables2(t *testing.T) {
 	setupTest()
@@ -233,7 +233,7 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	valid, err := contains(mgr.db, rec.table.name, pk)
+	valid, err := recordExists(mgr.db, rec.table.name, pk)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -280,7 +280,7 @@ func Test_Session_Session_Save(t *testing.T) {
 	}
 
 	// See if we can read the record that was just written
-	valid, err := contains(mgr.db, rec.table.name, pk)
+	valid, err := recordExists(mgr.db, rec.table.name, pk)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -325,14 +325,14 @@ func Test_Session_Session_Batch(t *testing.T) {
 	}
 
 	// See if the 2 records added are readable
-	valid, err := contains(mgr.db, records[0].table.name, VPersonID0)
+	valid, err := recordExists(mgr.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !valid {
 		t.Fatal(errors.New("Value not in database"))
 	}
-	valid, err = contains(mgr.db, records[1].table.name, VPersonID1)
+	valid, err = recordExists(mgr.db, records[1].table.name, VPersonID1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -421,7 +421,7 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	valid, err := contains(mgr.db, records[0].table.name, VPersonID0)
+	valid, err := recordExists(mgr.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -430,7 +430,7 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 	}
 	log.Println("Found", VPersonID0, "in DB")
 
-	valid, err = contains(mgr.db, records[1].table.name, VPersonID1)
+	valid, err = recordExists(mgr.db, records[1].table.name, VPersonID1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -438,22 +438,6 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 		t.Fatal(errors.New("Value not in database"))
 	}
 	log.Println("Found", VPersonID1, "in DB")
-}
-
-func contains(db *sql.DB, tableName string, id int64) (bool, error) {
-	q := "SELECT id from " + tableName + " where id=?"
-	var value int64
-
-	row := db.QueryRow(q, id)
-	err := row.Scan(&value)
-	if err != nil {
-		log.Println(err)
-		if err == sql.ErrNoRows {
-			return false, nil
-		}
-		return false, err
-	}
-	return value == id, nil
 }
 
 func Test_Session_Session_Save_MissingNotNullValue(t *testing.T) {
@@ -567,7 +551,7 @@ func Test_Session_Session_Get(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	valid, err := contains(mgr.db, records[0].table.name, VPersonID0)
+	valid, err := recordExists(mgr.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -576,7 +560,7 @@ func Test_Session_Session_Get(t *testing.T) {
 	}
 	log.Println("Found", VPersonID0, "in DB")
 
-	valid, err = contains(mgr.db, records[1].table.name, VPersonID1)
+	valid, err = recordExists(mgr.db, records[1].table.name, VPersonID1)
 	if err != nil {
 		t.Fatal(err)
 	}

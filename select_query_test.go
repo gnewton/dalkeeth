@@ -11,18 +11,17 @@ func Test00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(model.fieldTableMap)
-
-	age, ok := model.fieldTableMap["persons.age"]
+	//age, ok := model.fieldTableMap["persons.age"]
+	age, ok := model.fieldTableMap["addresses.street"]
 	if !ok {
+		t.Log(model.fieldTableMap)
 		t.Fatal("Unable to find persons.age field")
 	}
 
 	name := Field{name: "name", fieldType: StringType}
 
 	q := SelectQuery{
-		Fields: []AField{age, &name},
-
+		Fields:         []AField{age, &name},
 		Pks:            []int64{54, 767},
 		Where:          WN(&name, IsNotNull),
 		GroupBy:        []*Field{&name},

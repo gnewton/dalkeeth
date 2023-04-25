@@ -3,6 +3,7 @@ package dalkeeth
 import (
 	"fmt"
 	"log"
+	"os"
 )
 
 const TPerson = "persons"
@@ -33,7 +34,6 @@ func defineTestModel() (*Model, error) {
 	if err != nil {
 		return nil, err
 	}
-	model.AddTable(TPerson, persons)
 
 	if err != nil {
 		return nil, err
@@ -66,11 +66,7 @@ func defineTestModel() (*Model, error) {
 			defaultValue: "person's \"`name",
 		},
 	}...)
-
-	err = model.AddTable(TPersonK, persons) // FIXXX
-	if err != nil {
-		return nil, err
-	}
+	model.AddTable(TPersonK, persons)
 
 	//
 	addresses, err := NewTable(TAddress)
@@ -138,8 +134,7 @@ func defineTestModel() (*Model, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return model, nil
+	return model, model.Freeze()
 }
 
 func initAndPopulateTestTables() (*Session, error) {
@@ -149,7 +144,10 @@ func initAndPopulateTestTables() (*Session, error) {
 		return nil, err
 	}
 
-	mgr := NewSessionWithModel(model)
+	mgr, err := NewSession(model)
+	if err != nil {
+		return nil, err
+	}
 	mgr.dialect = new(DialectSqlite3)
 	sqls, err := mgr.CreateTablesSQL()
 
@@ -175,6 +173,8 @@ func initAndPopulateTestTables() (*Session, error) {
 	log.Println("Sql tables:", sqls)
 	for i := 0; i < len(sqls); i++ {
 		createSql := sqls[i]
+		log.Println(createSql)
+		fmt.Fprintln(os.Stdout, createSql)
 		result, err := db.Exec(createSql)
 
 		if err != nil {

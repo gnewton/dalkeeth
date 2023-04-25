@@ -18,16 +18,14 @@ type Session struct {
 	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
 }
 
-func NewSessionWithModel(model *Model) *Session {
+func NewSession(model *Model) (*Session, error) {
+	if !model.frozen {
+		return nil, fmt.Errorf("Model needs to be frozen before using it")
+	}
 	m := new(Session)
 	m.model = model
 	m.selectLimits = make(map[*Table]int64)
-	return m
-}
-
-func NewSession() *Session {
-	model := NewModel()
-	return NewSessionWithModel(model)
+	return m, nil
 }
 
 func (sess *Session) Close() error {

@@ -51,7 +51,10 @@ func TestSession_AddTable_KeyEmptyString(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mgr := NewSession()
+	mgr, err := NewSession(model)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer mgr.Close()
 
 	newTable, err := NewTable("test1")
@@ -89,12 +92,12 @@ func TestSession_AddTable_KeyCollision(t *testing.T) {
 
 	// end setup
 
-	newTable, err := NewTable(TPerson)
+	newTable, err := NewTable(TPersonK)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = model.AddTable(TPerson, newTable) // FIXXX
+	err = model.AddTable(TPersonK, newTable) // FIXXX
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -108,7 +111,10 @@ func TestSession_CreateTablesSQL_NilDialect(t *testing.T) {
 	}
 
 	// end setup
-	mgr := NewSessionWithModel(model)
+	mgr, err := NewSession(model)
+	if err != nil {
+		t.Fatal(err)
+	}
 	mgr.dialect = nil
 
 	_, err = mgr.CreateTablesSQL()
@@ -125,7 +131,10 @@ func TestSession_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	}
 
 	// end setup
-	mgr := NewSessionWithModel(model)
+	mgr, err := NewSession(model)
+	if err != nil {
+		t.Fatal(err)
+	}
 	mgr.dialect = nil
 
 	_, err = mgr.CreateTableIndexesSQL()
@@ -168,11 +177,11 @@ func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 		t.Error(err)
 	}
 
-	persons, exists := model.Table(TPerson)
+	persons, exists := model.Table(TPersonK)
 
 	if !exists {
 		t.Log(model.tablesMap)
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
 	addresses, exists := model.Table(TAddressK)
@@ -195,7 +204,7 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons, exists := mgr.Table(TPerson)
+	persons, exists := mgr.Table(TPersonK)
 	if !exists {
 		t.Error(errors.New("Persons cannot be found: is nil"))
 	}
@@ -251,9 +260,9 @@ func Test_Session_Session_Save(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons, exists := mgr.Table(TPerson)
+	persons, exists := mgr.Table(TPersonK)
 	if !exists {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
 	mgr.dialect = new(DialectSqlite3)
@@ -297,9 +306,9 @@ func Test_Session_Session_Batch(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons, exists := mgr.Table(TPerson)
+	persons, exists := mgr.Table(TPersonK)
 	if !exists {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
 	mgr.dialect = new(DialectSqlite3)
@@ -343,9 +352,13 @@ func Test_Session_Session_Batch(t *testing.T) {
 
 func Test_Session_Session_Begin_DBNil(t *testing.T) {
 	setupTest()
-	mgr := NewSession()
-
-	err := mgr.Begin()
+	mgr, err := initAndPopulateTestTables()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mgr.Close()
+	mgr.db = nil
+	err = mgr.Begin()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -396,9 +409,9 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons, exists := mgr.Table(TPerson)
+	persons, exists := mgr.Table(TPersonK)
 	if !exists {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
 	records, err := nPersonRecords(persons, 10000)
@@ -452,7 +465,10 @@ func Test_Session_Session_Save_MissingNotNullValue(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	mgr := NewSessionWithModel(model)
+	mgr, err := NewSession(model)
+	if err != nil {
+		t.Error(err)
+	}
 	mgr.db = db
 	mgr.dialect = new(DialectSqlite3)
 
@@ -489,7 +505,10 @@ func Test_Session_Session_Save_MissingPK(t *testing.T) {
 		t.Error(err)
 	}
 
-	mgr := NewSessionWithModel(model)
+	mgr, err := NewSession(model)
+	if err != nil {
+		t.Error(err)
+	}
 	mgr.db = db
 	mgr.dialect = new(DialectSqlite3)
 
@@ -524,9 +543,9 @@ func Test_Session_Session_Get(t *testing.T) {
 	}
 	defer mgr.Close()
 
-	persons, exists := mgr.Table(TPerson)
+	persons, exists := mgr.Table(TPersonK)
 	if !exists {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
 	mgr.dialect = new(DialectSqlite3)
@@ -668,10 +687,10 @@ func addForeignKey_Setup() (*Model, *Table, *Table, error) {
 		return nil, nil, nil, err
 	}
 
-	persons, exists := model.Table(TPerson)
+	persons, exists := model.Table(TPersonK)
 
 	if !exists {
-		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPerson)
+		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPersonK)
 	}
 
 	addresses, exists := model.Table(TAddressK)

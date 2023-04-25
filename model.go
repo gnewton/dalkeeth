@@ -2,6 +2,7 @@ package dalkeeth
 
 import (
 	"fmt"
+	"log"
 )
 
 type Model struct {
@@ -9,6 +10,7 @@ type Model struct {
 	tablesMap     map[string]*Table
 	selectLimits  map[*Table]int64  // This should be in manager?
 	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
+	frozen        bool
 }
 
 func NewModel() *Model {
@@ -16,6 +18,25 @@ func NewModel() *Model {
 	m.tablesMap = make(map[string]*Table)
 	return m
 }
+
+func (m *Model) Freeze() error {
+	if m.frozen {
+		return fmt.Errorf("Model is already frozen: multiple freezes?")
+	}
+	m.fieldTableMap = make(map[string]*Field, 0)
+
+	for i := 0; i < len(m.tables); i++ {
+		tbl := m.tables[i]
+		// fields
+		for i := 0; i < len(tbl.fields); i++ {
+			m.fieldTableMap[tbl.name+"."+tbl.fields[i].name] = tbl.fields[i]
+			log.Println("Adding table.field", tbl.name+"."+tbl.fields[i].name)
+		}
+	}
+	m.frozen = true
+	return nil
+}
+
 func (m *Model) Table(key string) (*Table, bool) {
 
 	t, ok := m.tablesMap[key]
@@ -27,6 +48,9 @@ func (m *Model) Table(key string) (*Table, bool) {
 
 // Key is mneumonic for table; Does not have to be the same as the table sql name.
 func (m *Model) AddTable(key string, tbl *Table) error {
+	if m.frozen {
+		return fmt.Errorf("Model is frozen: cannot add table to field")
+	}
 	if key == "" {
 		return fmt.Errorf("Key is empty string")
 	}
@@ -41,18 +65,13 @@ func (m *Model) AddTable(key string, tbl *Table) error {
 	m.tablesMap[key] = tbl
 	m.tables = append(m.tables, tbl)
 
-	if m.fieldTableMap == nil {
-		m.fieldTableMap = make(map[string]*Field, 0)
-	}
-	// fields
-	for i := 0; i < len(tbl.fields); i++ {
-		m.fieldTableMap[tbl.name+"."+tbl.fields[i].name] = tbl.fields[i]
-	}
-
 	return nil
 }
 
 func (mdl *Model) AddForeignKey(tbl *Table, field string, foreignTbl *Table, foreignKeyField string) error {
+	if mdl.frozen {
+		return fmt.Errorf("Model is frozen: change")
+	}
 	if tbl == nil {
 		return fmt.Errorf("manager.AddForeignKey: Table is nil")
 	}

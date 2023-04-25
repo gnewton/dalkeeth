@@ -14,7 +14,7 @@ var ShouldHaveFailed = errors.New("Should have failed.")
 
 func TestSession_Table_EmptyString(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	mgr, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func TestSession_Table_EmptyString(t *testing.T) {
 
 func TestSession_Table_UnknownString(t *testing.T) {
 	setupTest()
-	mgr, err := initTestTables()
+	mgr, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func TestSession_Table_UnknownString(t *testing.T) {
 
 func TestSession_AddTable_KeyEmptyString(t *testing.T) {
 	setupTest()
-	model, err := initTestTables()
+	model, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestSession_AddTable_KeyEmptyString(t *testing.T) {
 
 func TestSession_AddTable_NilTable(t *testing.T) {
 	setupTest()
-	model, err := initTestTables()
+	model, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestSession_AddTable_NilTable(t *testing.T) {
 
 func TestSession_AddTable_KeyCollision(t *testing.T) {
 	setupTest()
-	model, err := initTestTables()
+	model, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestSession_AddTable_KeyCollision(t *testing.T) {
 
 func TestSession_CreateTablesSQL_NilDialect(t *testing.T) {
 	setupTest()
-	model, err := initTestTables()
+	model, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +119,7 @@ func TestSession_CreateTablesSQL_NilDialect(t *testing.T) {
 
 func TestSession_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	setupTest()
-	model, err := initTestTables()
+	model, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestSession_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 
 func Test_SessionInitTables2(t *testing.T) {
 	setupTest()
-	_, err := initTestTables()
+	_, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,7 +162,7 @@ func Test_Session_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
 
 func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 	setupTest()
-	model, err := initTestTables()
+	model, err := defineTestModel()
 
 	if err != nil {
 		t.Error(err)
@@ -189,7 +189,7 @@ func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 func Test_Session_Session_SaveTx(t *testing.T) {
 	setupTest()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -245,7 +245,7 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 
 func Test_Session_Session_Save(t *testing.T) {
 	setupTest()
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -291,7 +291,7 @@ func Test_Session_Session_Save(t *testing.T) {
 
 func Test_Session_Session_Batch(t *testing.T) {
 	setupTest()
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -353,7 +353,7 @@ func Test_Session_Session_Begin_DBNil(t *testing.T) {
 
 func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 	setupTest()
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -374,7 +374,7 @@ func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 
 func Test_Session_Session_Commit_NilTx(t *testing.T) {
 	setupTest()
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -390,7 +390,7 @@ func Test_Session_Session_Commit_NilTx(t *testing.T) {
 
 func Test_Session_Session_BatchMany(t *testing.T) {
 	setupTest()
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -518,7 +518,7 @@ func Test_Session_Session_Save_MissingPK(t *testing.T) {
 
 func Test_Session_Session_Get(t *testing.T) {
 	setupTest()
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -662,7 +662,7 @@ func openTestDB() (*sql.DB, error) {
 	return sql.Open("sqlite3", ":memory:")
 }
 func addForeignKey_Setup() (*Model, *Table, *Table, error) {
-	model, err := initTestTables()
+	model, err := defineTestModel()
 
 	if err != nil {
 		return nil, nil, nil, err

@@ -40,6 +40,15 @@ func (m *Model) AddTable(key string, tbl *Table) error {
 	}
 	m.tablesMap[key] = tbl
 	m.tables = append(m.tables, tbl)
+
+	if m.fieldTableMap == nil {
+		m.fieldTableMap = make(map[string]*Field, 0)
+	}
+	// fields
+	for i := 0; i < len(tbl.fields); i++ {
+		m.fieldTableMap[tbl.name+"."+tbl.fields[i].name] = tbl.fields[i]
+	}
+
 	return nil
 }
 

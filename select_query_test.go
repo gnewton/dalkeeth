@@ -5,22 +5,35 @@ import (
 )
 
 func Test00(t *testing.T) {
-	age := Field{name: "age", fieldType: IntType}
+	setupTest()
+	model, err := defineTestModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(model.fieldTableMap)
+
+	age, ok := model.fieldTableMap["persons.age"]
+	if !ok {
+		t.Fatal("Unable to find persons.age field")
+	}
+
 	name := Field{name: "name", fieldType: StringType}
 
 	q := SelectQuery{
-		fields:         []*Field{&age, &name},
-		pks:            []int64{54, 767},
-		where:          WN(&name, IsNotNull),
-		groupBy:        []*Field{&name},
-		having:         W(&age, GT, 100),
-		offset:         1200,
-		limit:          100,
-		globalOrdering: ASC,
-		orderByFields:  []*FieldOrdered{},
+		Fields: []AField{age, &name},
+
+		Pks:            []int64{54, 767},
+		Where:          WN(&name, IsNotNull),
+		GroupBy:        []*Field{&name},
+		Having:         W(age, GT, 100),
+		Offset:         1200,
+		Limit:          100,
+		GlobalOrdering: ASC,
+		OrderByFields:  []*FieldOrdered{},
 	}
 
-	if err := q.Validate(); err != nil {
+	if err := q.Validate(model); err != nil {
 		t.Error(err)
 	}
 

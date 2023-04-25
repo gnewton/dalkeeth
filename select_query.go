@@ -12,21 +12,23 @@ func (ord Ordering) String() string {
 	return [...]string{"", "ASC", "DESC"}[ord]
 }
 
-type Fields []*Field
-
 type SelectQuery struct {
-	distinct       bool
-	fields         []*Field
-	pks            []int64
-	where          Condition
-	groupBy        []*Field
-	having         Condition
-	limit          int64
-	offset         int64
-	orderByFields  []*FieldOrdered
-	globalOrdering Ordering
-	validated      bool
-	selectLimit    int64
+	Distinct       bool
+	Fields         []AField
+	rawFields      []string
+	Pks            []int64
+	From           []*Table
+	FromRaw        []string
+	Where          Condition
+	GroupBy        []*Field
+	Having         Condition
+	Limit          int64
+	Offset         int64
+	OrderByFields  []*FieldOrdered
+	GlobalOrdering Ordering
+	SelectLimit    int64
+	//
+	validated bool
 }
 
 type FieldOrdered struct {
@@ -36,14 +38,21 @@ type FieldOrdered struct {
 	ordering Ordering
 }
 
-func (q *SelectQuery) Validate() error {
-	if err := zeroLength(q.fields, "SelectQuery.fields"); err != nil {
+func (q *SelectQuery) Validated() bool {
+	return q.validated
+}
+
+func (q *SelectQuery) Validate(m *Model) error {
+	if err := zeroLength(q.Fields, "SelectQuery.fields"); err != nil {
 		return err
 	}
 
-	if err := zeroLength(q.fields, "SelectQuery.fields"); err != nil {
+	err := rawFields(q, m)
+	if err != nil {
 		return err
 	}
+
+	q.validated = true
 	return nil
 }
 
@@ -72,3 +81,9 @@ type Rows struct { //temporary
 }
 
 //////////////////// ex2 NEW
+
+func (q *SelectQuery) Select(fields ...AField) {
+	for i := 0; i < len(fields); i++ {
+		//q.fields = append(q.fields, fields[i])
+	}
+}

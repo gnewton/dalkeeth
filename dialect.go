@@ -18,6 +18,7 @@ type Dialect interface {
 	ArbitraryFunc(string, []any) (string, error)
 	FunctionFieldSql(FunctionField) (string, error)
 	FieldAsSql(fa *FieldAs) (string, error)
+
 	//FieldFunction(int, ...Field)
 	//DropTableSql(string)
 }

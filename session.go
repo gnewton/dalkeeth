@@ -280,7 +280,7 @@ func (sess *Session) Rollback() error {
 
 func (sess *Session) NewSelectQuery() *SelectQuery {
 	q := SelectQuery{
-		fields: make([]*Field, 0),
+		Fields: make([]AField, 0),
 	}
 	return &q
 }

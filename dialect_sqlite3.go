@@ -53,34 +53,34 @@ func (d *DialectSqlite3) CreateTableIndexSql(ind *Index) (string, error) {
 }
 func (d *DialectSqlite3) SelectQuerySql(q *SelectQuery) (string, error) {
 
-	if err := q.Validate(); err != nil {
-		return "", err
+	if !q.Validated() {
+		return "", errors.New("SelectQuery not validated")
 	}
 
 	s := "SELECT "
-	if q.distinct {
+	if q.Distinct {
 		s += "DISTINCT "
 	}
 
-	s += d.makeFields(q.fields)
-	if len(q.pks) != 0 {
-		s += d.makePks(q.pks)
+	s += d.makeFields(q.Fields)
+	if len(q.Pks) != 0 {
+		s += d.makePks(q.Pks)
 	} else {
-		s += d.makeWhereClause(q.where)
+		s += d.makeWhereClause(q.Where)
 	}
-	s += d.makeGroupBy(q.groupBy)
-	s += d.makeHaving(q.having)
-	if q.limit > 0 {
-		s += " LIMIT " + strconv.FormatInt(q.limit, 10)
+	s += d.makeGroupBy(q.GroupBy)
+	s += d.makeHaving(q.Having)
+	if q.Limit > 0 {
+		s += " LIMIT " + strconv.FormatInt(q.Limit, 10)
 	}
-	if q.offset > 0 {
-		s += " OFFSET " + strconv.FormatInt(q.offset, 10)
+	if q.Offset > 0 {
+		s += " OFFSET " + strconv.FormatInt(q.Offset, 10)
 	}
 
-	if q.globalOrdering != NoOrdering {
+	if q.GlobalOrdering != NoOrdering {
 		s += "ORDER BY "
-		s += d.makeOrderByFields(q.orderByFields)
-		if q.globalOrdering == ASC {
+		s += d.makeOrderByFields(q.OrderByFields)
+		if q.GlobalOrdering == ASC {
 			s += " ASC"
 		} else {
 			s += " DESC"
@@ -385,15 +385,18 @@ func (d *DialectSqlite3) JoinSql(*Join, string, ...*Field) error {
 	return NotImplemented
 }
 
-func (d *DialectSqlite3) makeFields(fields []*Field) string {
+func (d *DialectSqlite3) makeFields(fields []AField) string {
 	if len(fields) == 0 {
 		return ""
 	}
 
-	s := fields[0].name
+	//s := fields[0].name
+	//s := fields[0].name
+	s, _ := fields[0].ToSqlString(d)
 
 	for i := 1; i < len(fields); i++ {
-		s += COMMA_SPACE + fields[i].name
+		field, _ := fields[i].ToSqlString(d)
+		s += COMMA_SPACE + field
 	}
 
 	return s

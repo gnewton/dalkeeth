@@ -4,12 +4,14 @@ import (
 	//"database/sql"
 	//"errors"
 	//"fmt"
+	"log"
 	"testing"
 )
 
-func TestDialectSqlte3(t *testing.T) {
+func TestDialectSqlite3(t *testing.T) {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	setupTest()
-	mgr, err := initAndWriteTestTables()
+	mgr, err := initAndPopulateTestTables()
 
 	if err != nil {
 		t.Error(err)

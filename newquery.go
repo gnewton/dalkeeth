@@ -11,7 +11,7 @@ type OrderBy struct {
 
 type Query struct {
 	selectFields []AField
-	selectAny    []string
+	selectRaw    []string
 	whereEquals  []AField
 	where        []*Condition
 	joins        []*Join2
@@ -26,7 +26,7 @@ type Query struct {
 func NewQuery() *Query {
 	return &Query{
 		selectFields: make([]AField, 0),
-		selectAny:    make([]string, 0),
+		selectRaw:    make([]string, 0),
 		whereEquals:  make([]AField, 0),
 		where:        make([]*Condition, 0),
 		joins:        make([]*Join2, 0),
@@ -46,7 +46,7 @@ func (q *Query) Select(fields ...AField) *Query {
 
 func (q *Query) SelectAny(strs ...string) *Query {
 	for i := 0; i < len(strs); i++ {
-		q.selectAny = append(q.selectAny, strs[i])
+		q.selectRaw = append(q.selectRaw, strs[i])
 	}
 	return q
 }

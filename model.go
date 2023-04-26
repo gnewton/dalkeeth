@@ -6,16 +6,18 @@ import (
 )
 
 type Model struct {
-	tables        []*Table
-	tablesMap     map[string]*Table
-	selectLimits  map[*Table]int64  // This should be in manager?
-	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
-	frozen        bool
+	tables            []*Table
+	tablesMap         map[string]*Table
+	containsTablesMap map[*Table]any
+	selectLimits      map[*Table]int64  // This should be in manager?
+	fieldTableMap     map[string]*Field // "key=tablename.fieldname", value=*Field
+	frozen            bool
 }
 
 func NewModel() *Model {
 	m := new(Model)
 	m.tablesMap = make(map[string]*Table)
+	m.containsTablesMap = make(map[*Table]any)
 	return m
 }
 
@@ -37,7 +39,12 @@ func (m *Model) Freeze() error {
 	return nil
 }
 
-func (m *Model) Table(key string) (*Table, bool) {
+func (m *Model) HasTable(tbl *Table) bool {
+	_, has := m.containsTablesMap[tbl]
+	return has
+}
+
+func (m *Model) TableByKey(key string) (*Table, bool) {
 
 	t, ok := m.tablesMap[key]
 	return t, ok
@@ -64,6 +71,7 @@ func (m *Model) AddTable(key string, tbl *Table) error {
 	}
 	m.tablesMap[key] = tbl
 	m.tables = append(m.tables, tbl)
+	m.containsTablesMap[tbl] = struct{}{}
 
 	return nil
 }

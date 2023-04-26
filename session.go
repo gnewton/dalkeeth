@@ -8,11 +8,9 @@ import (
 )
 
 type Session struct {
-	model *Model
-	db    *sql.DB
-	tx    *sql.Tx
-	//tables []*Table
-	//tablesMap     map[string]*Table
+	model         *Model
+	db            *sql.DB
+	tx            *sql.Tx
 	selectLimits  map[*Table]int64
 	dialect       Dialect
 	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
@@ -35,8 +33,8 @@ func (sess *Session) Close() error {
 	return sess.db.Close()
 }
 
-func (sess *Session) Table(key string) (*Table, bool) {
-	return sess.model.Table(key)
+func (sess *Session) TableByKey(key string) (*Table, bool) {
+	return sess.model.TableByKey(key)
 }
 
 func (sess *Session) InstantiateModel() error {
@@ -188,8 +186,14 @@ func (sess *Session) Save(r *Record) error {
 	if r == nil {
 		return errors.New("manager.Save: record is nil")
 	}
+	if len(r.values) == 0 {
+		return errors.New("manager.Save:record.values is empty")
+	}
 	if sess.dialect == nil {
 		return errors.New("manager.Save: dialext is nil")
+	}
+	if r.table == nil {
+		return errors.New("manager.Save:record.Table is nil")
 	}
 	saveSql, err := sess.dialect.SaveSql(r)
 	if err != nil {

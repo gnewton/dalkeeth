@@ -47,7 +47,12 @@ func (q *SelectQuery) Validate(m *Model) error {
 		return err
 	}
 
-	err := rawFields(q, m)
+	err := rawFieldsToFields(q, m)
+	if err != nil {
+		return err
+	}
+
+	err = rawFromTablesToTables(q, m)
 	if err != nil {
 		return err
 	}

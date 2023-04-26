@@ -48,3 +48,9 @@ q.GroupByM(model.Table("person").Field("age")...)
 
 q.Join("table1", "field1", "table2", field2")
 q.NamedJoin("person-place")
+
+q.Offset(int64)
+q.Limit(int64)
+q.OrderByFields(*FieldOrdered...)
+g.OrderBy()
+

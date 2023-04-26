@@ -20,6 +20,8 @@ sess.DeleteWhereS("foo", *Condition)
 sess.UpdateWhere(table, *Condition, *Values...)
 sess.UpdateWhereS(table, *Condition, *Values...)
 
+sess.InstantiateModel() // Creates tables, indexes, etc. in DB
+
 q.SelectS("age"...)
 q.Select("age", "AGE"...)
 q.Select(model.Table("person").Field("age")...)

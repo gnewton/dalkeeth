@@ -243,7 +243,7 @@ func (d *DialectSqlite3) tableInfo(db *sql.DB, tableName string) (*Table, error)
 	var name, ftype string
 	var dflt_value sql.NullString
 
-	log.Println(q)
+	//log.Println(q)
 	rows, err := db.Query(q)
 	defer closeRows(rows)
 

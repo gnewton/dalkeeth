@@ -15,6 +15,7 @@ type Query struct {
 	whereEquals  []AField
 	where        []*Condition
 	joins        []*Join2
+	joinsByName  map[string]*Join2
 	groupBy      []*Field // Can this be AField?
 	having       *Condition
 	orderBy      []*OrderBy

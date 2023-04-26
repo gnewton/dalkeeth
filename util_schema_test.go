@@ -3,7 +3,7 @@ package dalkeeth
 import (
 	"fmt"
 	"log"
-	"os"
+	//	"os"
 )
 
 const TPerson = "persons"
@@ -149,13 +149,13 @@ func initAndPopulateTestTables() (*Session, error) {
 		return nil, err
 	}
 	mgr.dialect = new(DialectSqlite3)
-	sqls, err := mgr.CreateTablesSQL()
+	sqls, err := mgr.createTablesSQL()
 
 	if err != nil {
 		return nil, err
 	}
 
-	indexesSql, err := mgr.CreateTableIndexesSQL()
+	indexesSql, err := mgr.createTableIndexesSQL()
 
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func initAndPopulateTestTables() (*Session, error) {
 	for i := 0; i < len(sqls); i++ {
 		createSql := sqls[i]
 		log.Println(createSql)
-		fmt.Fprintln(os.Stdout, createSql)
+		//fmt.Fprintln(os.Stdout, createSql)
 		result, err := db.Exec(createSql)
 
 		if err != nil {

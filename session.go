@@ -39,8 +39,11 @@ func (sess *Session) Table(key string) (*Table, bool) {
 	return sess.model.Table(key)
 }
 
-// Key is mneumonic for table; Does not have to be the same as the table sql name.
-func (sess *Session) CreateTablesSQL() ([]string, error) {
+func (sess *Session) InstantiateModel() error {
+	return nil
+}
+
+func (sess *Session) createTablesSQL() ([]string, error) {
 	if sess.dialect == nil {
 		return nil, fmt.Errorf("Dialect is nil")
 	}
@@ -57,7 +60,7 @@ func (sess *Session) CreateTablesSQL() ([]string, error) {
 	return sql, nil
 }
 
-func (sess *Session) CreateTableIndexesSQL() ([]string, error) {
+func (sess *Session) createTableIndexesSQL() ([]string, error) {
 	if sess.dialect == nil {
 		return nil, fmt.Errorf("Dialect is nil")
 	}

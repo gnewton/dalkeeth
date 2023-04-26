@@ -117,7 +117,7 @@ func TestSession_CreateTablesSQL_NilDialect(t *testing.T) {
 	}
 	mgr.dialect = nil
 
-	_, err = mgr.CreateTablesSQL()
+	_, err = mgr.createTablesSQL()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -137,7 +137,7 @@ func TestSession_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	}
 	mgr.dialect = nil
 
-	_, err = mgr.CreateTableIndexesSQL()
+	_, err = mgr.createTableIndexesSQL()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}

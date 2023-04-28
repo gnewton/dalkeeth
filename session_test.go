@@ -14,14 +14,14 @@ var ShouldHaveFailed = errors.New("Should have failed.")
 
 func TestSession_Table_EmptyString(t *testing.T) {
 	setupTest()
-	mgr, err := defineTestModel()
+	model, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
 	// end setup
 
 	tName := ""
-	_, exists := mgr.TableByKey(tName)
+	_, exists := model.TableByKey(tName)
 	if exists {
 		t.Fatal(fmt.Errorf("Table with empty string key"))
 	}
@@ -42,30 +42,6 @@ func TestSession_Table_UnknownString(t *testing.T) {
 		t.Fatal(fmt.Errorf("Table should not exist: %s", tName))
 	}
 
-}
-
-func TestSession_AddTable_KeyEmptyString(t *testing.T) {
-	setupTest()
-	model, err := defineTestModel()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	mgr, err := NewSession(model)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer mgr.Close()
-
-	newTable, err := NewTable("test1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	// end setup
-	err = model.AddTable("", newTable)
-	if err == nil {
-		t.Fatal(err)
-	}
 }
 
 func TestSession_AddTable_NilTable(t *testing.T) {
@@ -198,18 +174,20 @@ func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 func Test_Session_Session_SaveTx(t *testing.T) {
 	setupTest()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
+	defer sess.Close()
 
-	persons, exists := mgr.TableByKey(TPersonK)
+	sess.readWrite = true
+
+	persons, exists := sess.TableByKey(TPersonK)
 	if !exists {
 		t.Error(errors.New("Persons cannot be found: is nil"))
 	}
 
-	mgr.dialect = new(DialectSqlite3)
+	sess.dialect = new(DialectSqlite3)
 
 	pk := int64(23)
 	rec := persons.NewRecord()
@@ -227,22 +205,22 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.SaveTx(rec)
+	err = sess.SaveTx(rec)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Commit()
+	err = sess.Commit()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	valid, err := recordExists(mgr.db, rec.table.name, pk)
+	valid, err := recordExists(sess.db, rec.table.name, pk)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -254,18 +232,19 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 
 func Test_Session_Session_Save(t *testing.T) {
 	setupTest()
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
+	defer sess.Close()
 
-	persons, exists := mgr.TableByKey(TPersonK)
+	persons, exists := sess.TableByKey(TPersonK)
 	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
-	mgr.dialect = new(DialectSqlite3)
+	sess.dialect = new(DialectSqlite3)
+	sess.readWrite = true
 
 	pk := int64(23)
 	rec := persons.NewRecord()
@@ -283,13 +262,13 @@ func Test_Session_Session_Save(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = mgr.Save(rec)
+	err = sess.Save(rec)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// See if we can read the record that was just written
-	valid, err := recordExists(mgr.db, rec.table.name, pk)
+	valid, err := recordExists(sess.db, rec.table.name, pk)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -300,48 +279,48 @@ func Test_Session_Session_Save(t *testing.T) {
 
 func Test_Session_Session_Batch(t *testing.T) {
 	setupTest()
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
+	defer sess.Close()
 
-	persons, exists := mgr.TableByKey(TPersonK)
+	persons, exists := sess.TableByKey(TPersonK)
 	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
-	mgr.dialect = new(DialectSqlite3)
-
+	sess.dialect = new(DialectSqlite3)
+	sess.readWrite = true
 	records, err := twoPersonRecords(persons)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Batch(records)
+	err = sess.Batch(records)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Commit()
+	err = sess.Commit()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// See if the 2 records added are readable
-	valid, err := recordExists(mgr.db, records[0].table.name, VPersonID0)
+	valid, err := recordExists(sess.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !valid {
 		t.Fatal(errors.New("Value not in database"))
 	}
-	valid, err = recordExists(mgr.db, records[1].table.name, VPersonID1)
+	valid, err = recordExists(sess.db, records[1].table.name, VPersonID1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -352,13 +331,13 @@ func Test_Session_Session_Batch(t *testing.T) {
 
 func Test_Session_Session_Begin_DBNil(t *testing.T) {
 	setupTest()
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
-	mgr.db = nil
-	err = mgr.Begin()
+	defer sess.Close()
+	sess.db = nil
+	err = sess.Begin()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -366,19 +345,20 @@ func Test_Session_Session_Begin_DBNil(t *testing.T) {
 
 func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 	setupTest()
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
+	defer sess.Close()
+	sess.readWrite = true
 
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Should fail
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -387,14 +367,14 @@ func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 
 func Test_Session_Session_Commit_NilTx(t *testing.T) {
 	setupTest()
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
+	defer sess.Close()
 
 	// Should fail
-	err = mgr.Commit()
+	err = sess.Commit()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -403,13 +383,14 @@ func Test_Session_Session_Commit_NilTx(t *testing.T) {
 
 func Test_Session_Session_BatchMany(t *testing.T) {
 	setupTest()
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
+	defer sess.Close()
+	sess.readWrite = true
 
-	persons, exists := mgr.TableByKey(TPersonK)
+	persons, exists := sess.TableByKey(TPersonK)
 	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
@@ -419,22 +400,22 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Batch(records)
+	err = sess.Batch(records)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Commit()
+	err = sess.Commit()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	valid, err := recordExists(mgr.db, records[0].table.name, VPersonID0)
+	valid, err := recordExists(sess.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -443,7 +424,7 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 	}
 	log.Println("Found", VPersonID0, "in DB")
 
-	valid, err = recordExists(mgr.db, records[1].table.name, VPersonID1)
+	valid, err = recordExists(sess.db, records[1].table.name, VPersonID1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -465,12 +446,12 @@ func Test_Session_Session_Save_MissingNotNullValue(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	mgr, err := NewSession(model)
+	sess, err := NewSession(model)
 	if err != nil {
 		t.Error(err)
 	}
-	mgr.db = db
-	mgr.dialect = new(DialectSqlite3)
+	sess.db = db
+	sess.dialect = new(DialectSqlite3)
 
 	rec := persons.NewRecord()
 	err = rec.AddValue(FId, 23)
@@ -482,12 +463,12 @@ func Test_Session_Session_Save_MissingNotNullValue(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Save(rec)
+	err = sess.Save(rec)
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -505,12 +486,12 @@ func Test_Session_Session_Save_MissingPK(t *testing.T) {
 		t.Error(err)
 	}
 
-	mgr, err := NewSession(model)
+	sess, err := NewSession(model)
 	if err != nil {
 		t.Error(err)
 	}
-	mgr.db = db
-	mgr.dialect = new(DialectSqlite3)
+	sess.db = db
+	sess.dialect = new(DialectSqlite3)
 
 	rec := persons.NewRecord()
 
@@ -524,12 +505,12 @@ func Test_Session_Session_Save_MissingPK(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Save(rec)
+	err = sess.Save(rec)
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -537,40 +518,41 @@ func Test_Session_Session_Save_MissingPK(t *testing.T) {
 
 func Test_Session_Session_Get(t *testing.T) {
 	setupTest()
-	mgr, err := initAndPopulateTestTables()
+	sess, err := initAndPopulateTestTables()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer mgr.Close()
+	defer sess.Close()
 
-	persons, exists := mgr.TableByKey(TPersonK)
+	persons, exists := sess.TableByKey(TPersonK)
 	if !exists {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
-	mgr.dialect = new(DialectSqlite3)
+	sess.dialect = new(DialectSqlite3)
+	sess.readWrite = true
 
 	records, err := twoPersonRecords(persons)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Begin()
+	err = sess.Begin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Batch(records)
+	err = sess.Batch(records)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mgr.Commit()
+	err = sess.Commit()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	valid, err := recordExists(mgr.db, records[0].table.name, VPersonID0)
+	valid, err := recordExists(sess.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -579,7 +561,7 @@ func Test_Session_Session_Get(t *testing.T) {
 	}
 	log.Println("Found", VPersonID0, "in DB")
 
-	valid, err = recordExists(mgr.db, records[1].table.name, VPersonID1)
+	valid, err = recordExists(sess.db, records[1].table.name, VPersonID1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -590,7 +572,7 @@ func Test_Session_Session_Get(t *testing.T) {
 
 	// end setup
 
-	rec, err := mgr.Get(persons, VPersonID0)
+	rec, err := sess.Get(persons, VPersonID0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -605,7 +587,26 @@ func Test_Session_Session_Get(t *testing.T) {
 	//t.Log(rec.values[0].value)
 	//t.Log(rec.values[1].value)
 	//t.Log(rec.values[2].value)
+}
 
+func TestSession_InstantiateModel_ReadOnly(t *testing.T) {
+	setupTest()
+	model, err := defineTestModel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sess, err := NewSession(model)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// end setup
+
+	err = sess.InstantiateModel()
+	if err == nil {
+		t.Fatal(ShouldHaveFailed)
+	}
+	t.Log(err)
 }
 
 // Helpers

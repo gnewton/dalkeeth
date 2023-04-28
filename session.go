@@ -14,6 +14,7 @@ type Session struct {
 	selectLimits  map[*Table]int64
 	dialect       Dialect
 	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
+	readWrite     bool
 }
 
 func NewSession(model *Model) (*Session, error) {
@@ -38,6 +39,9 @@ func (sess *Session) TableByKey(key string) (*Table, bool) {
 }
 
 func (sess *Session) InstantiateModel() error {
+	if !sess.readWrite {
+		return errors.New("InstantiateModel: session is read-only")
+	}
 	return nil
 }
 
@@ -78,13 +82,19 @@ func (sess *Session) createTableIndexesSQL() ([]string, error) {
 }
 
 func (sess *Session) BatchChannel(chunkSize int) (chan *Record, error) {
+	if !sess.readWrite {
+		return nil, errors.New("BatchChannel: session is read-only")
+	}
 	return nil, NotImplemented
 }
 
 func (sess *Session) Batch(recs []*Record) error {
+	if !sess.readWrite {
+		return errors.New("Batch: session is read-only")
+	}
 	var err error
 	if sess.tx == nil {
-		return errors.New("manager.Save: tx is nil")
+		return errors.New("session.Save: tx is nil")
 	}
 
 	saveSql, err := sess.dialect.SaveSql(recs[0])
@@ -102,7 +112,7 @@ func (sess *Session) Batch(recs []*Record) error {
 		rawValues := rawValues(recs[i].values)
 		_, err = stmt.Exec(rawValues...)
 		if err != nil {
-			log.Println("manager.Batch: error")
+			log.Println("session.Batch: error")
 			log.Println(err)
 			return err
 		}
@@ -111,10 +121,16 @@ func (sess *Session) Batch(recs []*Record) error {
 }
 
 func (sess *Session) save(r *Record) error {
+	if !sess.readWrite {
+		return errors.New("save: session is read-only")
+	}
 	return NotImplemented
 }
 
 func (sess *Session) Update(r *Record) error {
+	if !sess.readWrite {
+		return errors.New("Update: session is read-only")
+	}
 	return NotImplemented
 }
 
@@ -137,13 +153,13 @@ func (sess *Session) GetS(tblName string, id int64) (*Record, error) {
 
 func (sess *Session) Get(tbl *Table, id int64) (*Record, error) {
 	if id < 0 {
-		return nil, errors.New("manager.Get: id < 0: ")
+		return nil, errors.New("session.Get: id < 0: ")
 	}
 	if sess.db == nil {
-		return nil, errors.New("manager.Get: db is nil")
+		return nil, errors.New("session.Get: db is nil")
 	}
 	if sess.dialect == nil {
-		return nil, errors.New("manager.Save: dialext is nil")
+		return nil, errors.New("session.Save: dialext is nil")
 	}
 
 	rec := tbl.NewRecord()
@@ -183,17 +199,20 @@ func (sess *Session) Get(tbl *Table, id int64) (*Record, error) {
 
 // Using db, not tx
 func (sess *Session) Save(r *Record) error {
+	if !sess.readWrite {
+		return errors.New("Save: session is read-only")
+	}
 	if r == nil {
-		return errors.New("manager.Save: record is nil")
+		return errors.New("session.Save: record is nil")
 	}
 	if len(r.values) == 0 {
-		return errors.New("manager.Save:record.values is empty")
+		return errors.New("session.Save:record.values is empty")
 	}
 	if sess.dialect == nil {
-		return errors.New("manager.Save: dialext is nil")
+		return errors.New("session.Save: dialext is nil")
 	}
 	if r.table == nil {
-		return errors.New("manager.Save:record.Table is nil")
+		return errors.New("session.Save:record.Table is nil")
 	}
 	saveSql, err := sess.dialect.SaveSql(r)
 	if err != nil {
@@ -212,11 +231,14 @@ func (sess *Session) Save(r *Record) error {
 }
 
 func (sess *Session) SaveTx(r *Record) error {
+	if !sess.readWrite {
+		return errors.New("SaveTx: session is read-only")
+	}
 	if sess.tx == nil {
-		return errors.New("manager.Save: tx is nil")
+		return errors.New("session.Save: tx is nil")
 	}
 	if sess.dialect == nil {
-		return errors.New("manager.Save: dialext is nil")
+		return errors.New("session.Save: dialext is nil")
 	}
 	saveSql, err := sess.dialect.SaveSql(r)
 	if err != nil {

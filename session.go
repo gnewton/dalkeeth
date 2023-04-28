@@ -81,6 +81,7 @@ func (sess *Session) createTableIndexesSQL() ([]string, error) {
 	return sql, nil
 }
 
+// Creates new tx and commits at end
 func (sess *Session) BatchChannel(chunkSize int) (chan *Record, error) {
 	if !sess.readWrite {
 		return nil, errors.New("BatchChannel: session is read-only")
@@ -88,22 +89,29 @@ func (sess *Session) BatchChannel(chunkSize int) (chan *Record, error) {
 	return nil, NotImplemented
 }
 
+// Creates new tx and commits at end
 func (sess *Session) Batch(recs []*Record) error {
 	if !sess.readWrite {
 		return errors.New("Batch: session is read-only")
 	}
 	var err error
-	if sess.tx == nil {
-		return errors.New("session.Save: tx is nil")
+	if sess.tx != nil {
+		return errors.New("session.Save: tx is not nil")
+	}
+	err = sess.Begin()
+	if err != nil {
+		return err
 	}
 
 	saveSql, err := sess.dialect.SaveSql(recs[0])
 	if err != nil {
+		//FIXXX: roll back
 		return err
 	}
 
 	stmt, err := sess.tx.Prepare(saveSql)
 	if err != nil {
+		//FIXXX: roll back
 		log.Fatal(err)
 	}
 	defer stmt.Close() // danger!
@@ -114,17 +122,17 @@ func (sess *Session) Batch(recs []*Record) error {
 		if err != nil {
 			log.Println("session.Batch: error")
 			log.Println(err)
+			//FIXXX: roll back
 			return err
 		}
 	}
-	return nil
-}
-
-func (sess *Session) save(r *Record) error {
-	if !sess.readWrite {
-		return errors.New("save: session is read-only")
+	err = sess.Commit()
+	if err != nil {
+		//FIXXX: roll back
+		return err
 	}
-	return NotImplemented
+
+	return nil
 }
 
 func (sess *Session) Update(r *Record) error {

@@ -297,17 +297,7 @@ func Test_Session_Session_Batch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = sess.Begin()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	err = sess.Batch(records)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = sess.Commit()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -400,17 +390,7 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = sess.Begin()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	err = sess.Batch(records)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = sess.Commit()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -537,21 +517,10 @@ func Test_Session_Session_Get(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = sess.Begin()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	err = sess.Batch(records)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	err = sess.Commit()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	valid, err := recordExists(sess.db, records[0].table.name, VPersonID0)
 	if err != nil {
 		t.Fatal(err)

@@ -5,19 +5,20 @@ import (
 )
 
 type Dialect interface {
+	ArbitraryFunc(string, []any) (string, error)
 	CreateTableIndexSql(*Index) (string, error)
 	CreateTableSql(*Table) (string, error)
+	DeleteSql(tbl *Table, id int64) (string, error)
 	DialectName() string
+	ExtractTable(db *sql.DB, tableName string) (*Table, error)
+	FieldAsSql(fa *FieldAs) (string, error)
+	FunctionFieldSql(FunctionField) (string, error)
 	GetSingleRecordSql(*Record, int64) (string, error)
+	JoinSql(*Join, string, ...*Field) error
 	SaveSql(*Record) (string, error)
+	SelectQuerySql(*SelectQuery) (string, error)
 	Table(*Table) (string, error)
 	ValidTableName(string) error
-	JoinSql(*Join, string, ...*Field) error
-	ExtractTable(db *sql.DB, tableName string) (*Table, error)
-	SelectQuerySql(*SelectQuery) (string, error)
-	ArbitraryFunc(string, []any) (string, error)
-	FunctionFieldSql(FunctionField) (string, error)
-	FieldAsSql(fa *FieldAs) (string, error)
 
 	//FieldFunction(int, ...Field)
 	//DropTableSql(string)

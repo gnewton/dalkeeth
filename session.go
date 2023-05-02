@@ -313,6 +313,36 @@ func (sess *Session) Rollback() error {
 	return nil
 }
 
+// Using db, not tx
+func (sess *Session) Delete(tbl *Table, id int64) error {
+	if !sess.readWrite {
+		return errors.New("Save: session is read-only")
+	}
+	if tbl == nil {
+		return errors.New("session.Delete: table is nil")
+	}
+	if id < 0 {
+		return errors.New("session.Delete: id < 0")
+	}
+	if sess.dialect == nil {
+		return errors.New("session.Save: dialext is nil")
+	}
+
+	deleteSql, err := sess.dialect.DeleteSql(tbl, id)
+	if err != nil {
+		return err
+	}
+
+	log.Println(deleteSql)
+
+	_, err = sess.db.Exec(deleteSql, id)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (sess *Session) NewSelectQuery() *SelectQuery {
 	q := SelectQuery{
 		Fields: make([]AField, 0),

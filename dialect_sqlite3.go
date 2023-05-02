@@ -381,6 +381,21 @@ func (d *DialectSqlite3) SaveSql(r *Record) (string, error) {
 	return s, nil
 }
 
+func (d *DialectSqlite3) DeleteSql(tbl *Table, id int64) (string, error) {
+	if tbl == nil {
+		return "", errors.New("DialectSqlite3.Delete: table is nil")
+	}
+	if id < 0 {
+		return "", errors.New("DialectSqlite3.Delete: id < 0")
+	}
+
+	if tbl.name == "" {
+		return "", errors.New("DialectSqlite3.Delete: table name is empty string")
+	}
+
+	return "DELETE FROM " + tbl.name + " WHERE " + tbl.pk.name + "=?", NotImplemented
+}
+
 func (d *DialectSqlite3) JoinSql(*Join, string, ...*Field) error {
 	return NotImplemented
 }

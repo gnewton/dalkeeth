@@ -34,7 +34,7 @@ func (sess *Session) Close() error {
 	return sess.db.Close()
 }
 
-func (sess *Session) TableByKey(key string) (*Table, bool) {
+func (sess *Session) TableByKey(key string) *Table {
 	return sess.model.TableByKey(key)
 }
 

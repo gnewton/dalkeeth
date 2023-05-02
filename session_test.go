@@ -21,8 +21,8 @@ func TestSession_Table_EmptyString(t *testing.T) {
 	// end setup
 
 	tName := ""
-	_, exists := model.TableByKey(tName)
-	if exists {
+	tbl := model.TableByKey(tName)
+	if tbl != nil {
 		t.Fatal(fmt.Errorf("Table with empty string key"))
 	}
 
@@ -37,8 +37,8 @@ func TestSession_Table_UnknownString(t *testing.T) {
 	// end setup
 
 	tName := "not-existing-table-foo"
-	_, exists := mgr.TableByKey(tName)
-	if exists {
+	tbl := mgr.TableByKey(tName)
+	if tbl != nil {
 		t.Fatal(fmt.Errorf("Table should not exist: %s", tName))
 	}
 
@@ -153,16 +153,16 @@ func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 		t.Error(err)
 	}
 
-	persons, exists := model.TableByKey(TPersonK)
+	persons := model.TableByKey(TPersonK)
 
-	if !exists {
+	if persons == nil {
 		t.Log(model.tablesMap)
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
-	addresses, exists := model.TableByKey(TAddressK)
+	addresses := model.TableByKey(TAddressK)
 
-	if !exists {
+	if addresses == nil {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TAddressK))
 	}
 
@@ -182,8 +182,8 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 
 	sess.readWrite = true
 
-	persons, exists := sess.TableByKey(TPersonK)
-	if !exists {
+	persons := sess.TableByKey(TPersonK)
+	if persons == nil {
 		t.Error(errors.New("Persons cannot be found: is nil"))
 	}
 
@@ -238,8 +238,8 @@ func Test_Session_Session_Save(t *testing.T) {
 	}
 	defer sess.Close()
 
-	persons, exists := sess.TableByKey(TPersonK)
-	if !exists {
+	persons := sess.TableByKey(TPersonK)
+	if persons == nil {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
@@ -285,8 +285,8 @@ func Test_Session_Session_Batch(t *testing.T) {
 	}
 	defer sess.Close()
 
-	persons, exists := sess.TableByKey(TPersonK)
-	if !exists {
+	persons := sess.TableByKey(TPersonK)
+	if persons == nil {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
@@ -380,8 +380,8 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 	defer sess.Close()
 	sess.readWrite = true
 
-	persons, exists := sess.TableByKey(TPersonK)
-	if !exists {
+	persons := sess.TableByKey(TPersonK)
+	if persons == nil {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
@@ -504,8 +504,8 @@ func Test_Session_Session_Get(t *testing.T) {
 	}
 	defer sess.Close()
 
-	persons, exists := sess.TableByKey(TPersonK)
-	if !exists {
+	persons := sess.TableByKey(TPersonK)
+	if persons == nil {
 		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
 	}
 
@@ -575,7 +575,7 @@ func TestSession_InstantiateModel_ReadOnly(t *testing.T) {
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
-	t.Log(err)
+	//t.Log(err)
 }
 
 // Helpers
@@ -657,15 +657,15 @@ func addForeignKey_Setup() (*Model, *Table, *Table, error) {
 		return nil, nil, nil, err
 	}
 
-	persons, exists := model.TableByKey(TPersonK)
+	persons := model.TableByKey(TPersonK)
 
-	if !exists {
+	if persons == nil {
 		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPersonK)
 	}
 
-	addresses, exists := model.TableByKey(TAddressK)
+	addresses := model.TableByKey(TAddressK)
 
-	if !exists {
+	if addresses == nil {
 		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TAddressK)
 	}
 

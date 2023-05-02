@@ -44,10 +44,13 @@ func (m *Model) HasTable(tbl *Table) bool {
 	return has
 }
 
-func (m *Model) TableByKey(key string) (*Table, bool) {
+func (m *Model) TableByKey(key string) *Table {
 
 	t, ok := m.tablesMap[key]
-	return t, ok
+	if !ok {
+		return nil
+	}
+	return t
 	//}
 	//return nil
 	//return m.tablesMap[key]

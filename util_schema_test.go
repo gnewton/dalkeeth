@@ -14,7 +14,14 @@ const FAge = "age"
 const FWeight = "weight"
 const FCitizen = "citizen"
 const VPersonID0 = int64(43)
-const VPersonID1 = int64(89)
+const VPersonName0 = "Fred"
+const VPersonAge0 = 42
+const VPersonWeight0 = 72
+
+const VPersonID1 = int64(1090)
+const VPersonName1 = "Sally"
+const VPersonAge1 = 37
+const VPersonWeight1 = 60
 
 const TAddress = "addresses"
 const TAddressK = "address_key"
@@ -144,18 +151,18 @@ func initAndPopulateTestTables() (*Session, error) {
 		return nil, err
 	}
 
-	mgr, err := NewSession(model)
+	sess, err := NewSession(model)
 	if err != nil {
 		return nil, err
 	}
-	mgr.dialect = new(DialectSqlite3)
-	sqls, err := mgr.createTablesSQL()
+	sess.dialect = new(DialectSqlite3)
+	sqls, err := sess.createTablesSQL()
 
 	if err != nil {
 		return nil, err
 	}
 
-	indexesSql, err := mgr.createTableIndexesSQL()
+	indexesSql, err := sess.createTableIndexesSQL()
 
 	if err != nil {
 		return nil, err
@@ -166,8 +173,8 @@ func initAndPopulateTestTables() (*Session, error) {
 		return nil, err
 	}
 
-	mgr.db = db
-	mgr.dialect = new(DialectSqlite3)
+	sess.db = db
+	sess.dialect = new(DialectSqlite3)
 
 	// Create tables sql
 	log.Println("Sql tables:", sqls)
@@ -204,5 +211,5 @@ func initAndPopulateTestTables() (*Session, error) {
 
 	}
 
-	return mgr, nil
+	return sess, nil
 }

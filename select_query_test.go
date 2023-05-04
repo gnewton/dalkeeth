@@ -12,20 +12,28 @@ func Test00(t *testing.T) {
 	}
 
 	//age, ok := model.fieldTableMap["persons.age"]
-	age, ok := model.fieldTableMap["addresses.street"]
+	//age, ok := model.fieldTableMap["addresses.street"]
+	ageField, ok := model.fieldTableMap[TAddress+"."+FStreet]
 	if !ok {
 		t.Log(model.fieldTableMap)
 		t.Fatal("Unable to find persons.age field")
 	}
 
-	name := Field{name: "name", fieldType: StringType}
+	addressTable, ok := model.tablesMap[TAddressK]
+	if !ok {
+		t.Fatal("Unable to find addresses table")
+	}
+
+	nameField := Field{name: "name", fieldType: StringType}
+	// Assumed to be from
 
 	q := SelectQuery{
-		Fields:         []AField{age, &name},
+		Fields:         []AField{ageField, &nameField},
+		From:           []*Table{addressTable},
 		Pks:            []int64{54, 767},
-		Where:          WN(&name, IsNotNull),
-		GroupBy:        []*Field{&name},
-		Having:         W(age, GT, 100),
+		Where:          WN(&nameField, IsNotNull),
+		GroupBy:        []*Field{&nameField},
+		Having:         W(ageField, GT, 100),
 		Offset:         1200,
 		Limit:          100,
 		GlobalOrdering: ASC,

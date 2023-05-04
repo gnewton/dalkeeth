@@ -3,7 +3,7 @@
 session sess
 
 
-Query q := model.Query()
+Query q := model.Query(table1,table2)
 
 sess.Get(table, int64) // DONE
 sess.GetS("foo", int64)

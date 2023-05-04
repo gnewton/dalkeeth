@@ -16,6 +16,11 @@ type Record struct {
 	valuesMap map[string]*Value
 }
 
+type ResultSet struct {
+	values    []*Value
+	valuesMap map[string]*Value
+}
+
 type Value struct {
 	field    *Field
 	value    any

@@ -10,7 +10,7 @@ import (
 
 const ID = "id"
 
-type Record struct {
+type InRecord struct {
 	table     *Table
 	values    []*Value
 	valuesMap map[string]*Value
@@ -35,6 +35,7 @@ type Table struct {
 	fieldsMap   map[string]*Field
 	indexes     []*Index
 	foreignKeys []*ForeignKey
+	frozen      bool
 }
 
 type ForeignKey struct {
@@ -62,7 +63,7 @@ type Index struct {
 	table  *Table
 }
 
-func NewTable(name string) (*Table, error) {
+func NewTable2(name string) (*Table, error) {
 	if name == "" {
 		return nil, errors.New("Table name is empty")
 	}
@@ -72,7 +73,11 @@ func NewTable(name string) (*Table, error) {
 	return tbl, nil
 }
 
-func (rec *Record) GetInt(fieldName string, vv *int64) error {
+func (t *Table) Freeze() error {
+	return NotImplemented
+}
+
+func (rec *InRecord) GetInt(fieldName string, vv *int64) error {
 	v, err := rec.Value(fieldName)
 	if err != nil {
 		return err
@@ -88,7 +93,7 @@ func (rec *Record) GetInt(fieldName string, vv *int64) error {
 	return nil
 }
 
-func (rec *Record) GetString(fieldName string, vv *string) error {
+func (rec *InRecord) GetString(fieldName string, vv *string) error {
 	v, err := rec.Value(fieldName)
 	if err != nil {
 		return err
@@ -104,7 +109,7 @@ func (rec *Record) GetString(fieldName string, vv *string) error {
 
 }
 
-func (rec *Record) GetBool(fieldName string, vv *bool) error {
+func (rec *InRecord) GetBool(fieldName string, vv *bool) error {
 	v, err := rec.Value(fieldName)
 	if err != nil {
 		return err
@@ -120,7 +125,7 @@ func (rec *Record) GetBool(fieldName string, vv *bool) error {
 
 }
 
-func (rec *Record) GetFloat(fieldName string, vv *float64) error {
+func (rec *InRecord) GetFloat(fieldName string, vv *float64) error {
 	v, err := rec.Value(fieldName)
 	if err != nil {
 		return err
@@ -136,7 +141,7 @@ func (rec *Record) GetFloat(fieldName string, vv *float64) error {
 
 }
 
-func (rec *Record) Value(fieldName string) (*Value, error) {
+func (rec *InRecord) Value(fieldName string) (*Value, error) {
 	if fieldName == "" {
 		return nil, errors.New("Field name is empty")
 	}
@@ -152,7 +157,7 @@ func (rec *Record) Value(fieldName string) (*Value, error) {
 	return v, nil
 }
 
-func (rec *Record) Save(tx *sql.Tx) error {
+func (rec *InRecord) Save(tx *sql.Tx) error {
 	insert := "INSERT INTO " + rec.table.name + "("
 	for i := 0; i < len(rec.values); i++ {
 		if i != 0 {
@@ -191,7 +196,11 @@ func (rec *Record) Save(tx *sql.Tx) error {
 	return nil
 }
 
-func (rec *Record) AddValue(name string, value any) error {
+func (rec *InRecord) SetValues([]*Value) error {
+	return NotImplemented
+}
+
+func (rec *InRecord) SetValue(name string, value any) error {
 	var v *Value
 	var ok bool
 	if v, ok = rec.valuesMap[name]; !ok {
@@ -208,8 +217,8 @@ func (rec *Record) AddValue(name string, value any) error {
 	return nil
 }
 
-func (t *Table) NewRecord() *Record {
-	rec := new(Record)
+func (t *Table) NewRecord() *InRecord {
+	rec := new(InRecord)
 	rec.table = t
 	if t == nil {
 		log.Fatal("t == nil")
@@ -469,7 +478,7 @@ func (t *Table) AllFields() string {
 	return fs
 }
 
-func (t *Table) SelectRecordsSimpleWhere(db *sql.DB, left, operator, right string, limit, offset int64) (*[]Record, error) {
+func (t *Table) SelectRecordsSimpleWhere(db *sql.DB, left, operator, right string, limit, offset int64) (*[]InRecord, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
@@ -478,7 +487,7 @@ func (t *Table) notField(field string) bool {
 	return false
 }
 
-// func (t *Table) SelectRecordSimpleWhere(db *sql.DB, left, operator, right string) (*Record, error) {
+// func (t *Table) SelectInRecordSimpleWhere(db *sql.DB, left, operator, right string) (*Record, error) {
 
 // 	if t.notField(left) {
 // 		return nil, fmt.Errorf("%s is not a field in table %s", left, t.name)

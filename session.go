@@ -82,7 +82,7 @@ func (sess *Session) createTableIndexesSQL() ([]string, error) {
 }
 
 // Creates new tx and commits at end
-func (sess *Session) BatchChannel(chunkSize int) (chan *Record, error) {
+func (sess *Session) BatchChannel(chunkSize int) (chan *InRecord, error) {
 	if !sess.readWrite {
 		return nil, errors.New("BatchChannel: session is read-only")
 	}
@@ -90,7 +90,7 @@ func (sess *Session) BatchChannel(chunkSize int) (chan *Record, error) {
 }
 
 // Creates new tx and commits at end
-func (sess *Session) Batch(recs []*Record) error {
+func (sess *Session) Batch(recs []*InRecord) error {
 	if !sess.readWrite {
 		return errors.New("Batch: session is read-only")
 	}
@@ -135,20 +135,20 @@ func (sess *Session) Batch(recs []*Record) error {
 	return nil
 }
 
-func (sess *Session) Update(r *Record) error {
+func (sess *Session) Update(r *InRecord) error {
 	if !sess.readWrite {
 		return errors.New("Update: session is read-only")
 	}
 	return NotImplemented
 }
 
-func (sess *Session) GetNamed(tableName string, id int64) (*Record, error) {
+func (sess *Session) GetNamed(tableName string, id int64) (*InRecord, error) {
 	// find tableName
 	// Get(tablename, id)
 	return nil, NotImplemented
 }
 
-func (sess *Session) GetS(tblName string, id int64) (*Record, error) {
+func (sess *Session) GetS(tblName string, id int64) (*InRecord, error) {
 	var tbl *Table
 	var ok bool
 
@@ -159,7 +159,7 @@ func (sess *Session) GetS(tblName string, id int64) (*Record, error) {
 	return sess.Get(tbl, id)
 }
 
-func (sess *Session) Get(tbl *Table, id int64) (*Record, error) {
+func (sess *Session) Get(tbl *Table, id int64) (*InRecord, error) {
 	if id < 0 {
 		return nil, errors.New("session.Get: id < 0: ")
 	}
@@ -205,8 +205,21 @@ func (sess *Session) Get(tbl *Table, id int64) (*Record, error) {
 
 }
 
+func (sess *Session) SaveFields(tbl *Table, values []*Value) error {
+	// Check to make sure fields are in this table
+	//  Not implemented
+
+	//rawValues := rawValues(values)
+	//_, err := sess.db.Exec(saveSql, rawValues...)
+
+	//if err != nil {
+	//return err
+	//}
+	return NotImplemented
+}
+
 // Using db, not tx
-func (sess *Session) Save(r *Record) error {
+func (sess *Session) Save(r *InRecord) error {
 	if !sess.readWrite {
 		return errors.New("Save: session is read-only")
 	}
@@ -238,7 +251,7 @@ func (sess *Session) Save(r *Record) error {
 	return nil
 }
 
-func (sess *Session) SaveTx(r *Record) error {
+func (sess *Session) SaveTx(r *InRecord) error {
 	if !sess.readWrite {
 		return errors.New("SaveTx: session is read-only")
 	}

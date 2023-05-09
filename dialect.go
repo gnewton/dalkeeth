@@ -13,9 +13,9 @@ type Dialect interface {
 	ExtractTable(db *sql.DB, tableName string) (*Table, error)
 	FieldAsSql(fa *FieldAs) (string, error)
 	FunctionFieldSql(FunctionField) (string, error)
-	GetSingleRecordSql(*Record, int64) (string, error)
+	GetSingleRecordSql(*InRecord, int64) (string, error)
 	JoinSql(*Join, string, ...*Field) error
-	SaveSql(*Record) (string, error)
+	SaveSql(*InRecord) (string, error)
 	SelectQuerySql(*SelectQuery) (string, error)
 	Table(*Table) (string, error)
 	ValidTableName(string) error

@@ -262,7 +262,7 @@ func (d *DialectSqlite3) tableInfo(db *sql.DB, tableName string) (*Table, error)
 }
 
 // Only use fields that have set values
-func setRecords(r *Record) (string, error) {
+func insertFields(r *InRecord) (string, error) {
 	s := ""
 
 	first := true
@@ -292,7 +292,7 @@ func setRecords(r *Record) (string, error) {
 }
 
 // Only use fields that have set values
-func wantedFields(r *Record) (string, error) {
+func wantedFields(r *InRecord) (string, error) {
 	s := ""
 
 	first := true
@@ -314,10 +314,10 @@ func wantedFields(r *Record) (string, error) {
 	return s, nil
 }
 
-func (d *DialectSqlite3) GetSingleRecordSql(rec *Record, id int64) (string, error) {
+func (d *DialectSqlite3) GetSingleRecordSql(rec *InRecord, id int64) (string, error) {
 
 	if rec == nil {
-		return "", errors.New("Record is nil")
+		return "", errors.New("InRecord is nil")
 	}
 
 	s := "SELECT "
@@ -332,7 +332,7 @@ func (d *DialectSqlite3) GetSingleRecordSql(rec *Record, id int64) (string, erro
 	return s, nil
 }
 
-func (d *DialectSqlite3) valuesPlaceholders(r *Record) (string, error) {
+func (d *DialectSqlite3) valuesPlaceholders(r *InRecord) (string, error) {
 	s := ""
 
 	first := true
@@ -355,14 +355,14 @@ func (d *DialectSqlite3) valuesPlaceholders(r *Record) (string, error) {
 	return s, nil
 }
 
-func (d *DialectSqlite3) SaveSql(r *Record) (string, error) {
+func (d *DialectSqlite3) SaveSql(r *InRecord) (string, error) {
 	if r == nil {
 		return "", errors.New("DialectSqlite3.Save: record is nil")
 	}
 
 	s := "INSERT INTO " + r.table.name + " ("
 
-	fieldsSet, err := setRecords(r)
+	fieldsSet, err := insertFields(r)
 	if err != nil {
 		return "", err
 	}

@@ -57,7 +57,6 @@ func (fa *FieldAs) ToSqlString(d Dialect) (string, error) {
 }
 
 func validTypeForField(v any, f *Field) error {
-
 	switch t := v.(type) {
 	case int:
 		if f.fieldType != IntType {
@@ -76,17 +75,6 @@ func validTypeForField(v any, f *Field) error {
 	}
 
 	return nil
-}
-
-func NewField(name string, fieldType FieldType, pk, indexed, notNull bool, length int) *Field {
-	f := new(Field)
-	f.name = name
-	f.fieldType = fieldType
-	f.pk = pk
-	f.indexed = indexed
-	f.notNull = notNull
-	f.length = length
-	return f
 }
 
 func (f *Field) ToSqlString(d Dialect) (string, error) {

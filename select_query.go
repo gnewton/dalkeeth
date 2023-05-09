@@ -63,10 +63,10 @@ func (q *SelectQuery) Validate(m *Model) error {
 
 // ////////////////////////////////////
 // Run
-func (q *SelectQuery) First() (*Record, error) {
+func (q *SelectQuery) First() (*InRecord, error) {
 	return nil, nil
 }
-func (q *SelectQuery) Last() (*Record, error) {
+func (q *SelectQuery) Last() (*InRecord, error) {
 	return nil, nil
 }
 

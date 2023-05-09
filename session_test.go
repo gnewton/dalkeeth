@@ -44,7 +44,7 @@ func TestSession_Table_UnknownString(t *testing.T) {
 
 }
 
-func TestSession_AddTable_NilTable(t *testing.T) {
+func TestSession_AddTableToFrozenModel(t *testing.T) {
 	setupTest()
 	model, err := defineTestModel()
 	if err != nil {
@@ -53,30 +53,11 @@ func TestSession_AddTable_NilTable(t *testing.T) {
 
 	// end setup
 
-	err = model.AddTable("valid", nil) // FIXX
+	_, err = model.NewTable(TPerson)
 	if err == nil {
-		t.Fatal(err)
-	}
-}
-
-func TestSession_AddTable_KeyCollision(t *testing.T) {
-	setupTest()
-	model, err := defineTestModel()
-	if err != nil {
-		t.Fatal(err)
+		t.Fatal(errors.New("Should fail: cannot add table to frozen model"))
 	}
 
-	// end setup
-
-	newTable, err := NewTable(TPersonK)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = model.AddTable(TPersonK, newTable) // FIXXX
-	if err == nil {
-		t.Fatal(ShouldHaveFailed)
-	}
 }
 
 func TestSession_CreateTablesSQL_NilDialect(t *testing.T) {
@@ -153,17 +134,17 @@ func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 		t.Error(err)
 	}
 
-	persons := model.TableByKey(TPersonK)
+	persons := model.TableByKey(TPerson)
 
 	if persons == nil {
 		t.Log(model.tablesMap)
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
-	addresses := model.TableByKey(TAddressK)
+	addresses := model.TableByKey(TAddress)
 
 	if addresses == nil {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TAddressK))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TAddress))
 	}
 
 	if model.AddForeignKey(persons, FId, addresses, "foo") == nil {
@@ -174,7 +155,7 @@ func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
 func Test_Session_Session_SaveTx(t *testing.T) {
 	setupTest()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +163,7 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 
 	sess.readWrite = true
 
-	persons := sess.TableByKey(TPersonK)
+	persons := sess.TableByKey(TPerson)
 	if persons == nil {
 		t.Error(errors.New("Persons cannot be found: is nil"))
 	}
@@ -191,16 +172,16 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 
 	pk := int64(23)
 	rec := persons.NewRecord()
-	err = rec.AddValue(FId, pk)
+	err = rec.SetValue(FId, pk)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = rec.AddValue(FName, "Fred")
+	err = rec.SetValue(FName, "Fred")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rec.AddValue(FAge, 54)
+	err = rec.SetValue(FAge, 54)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -232,15 +213,15 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 
 func Test_Session_Session_Save(t *testing.T) {
 	setupTest()
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer sess.Close()
 
-	persons := sess.TableByKey(TPersonK)
+	persons := sess.TableByKey(TPerson)
 	if persons == nil {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
 	sess.dialect = new(DialectSqlite3)
@@ -248,16 +229,16 @@ func Test_Session_Session_Save(t *testing.T) {
 
 	pk := int64(23)
 	rec := persons.NewRecord()
-	err = rec.AddValue(FId, pk)
+	err = rec.SetValue(FId, pk)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = rec.AddValue(FName, "Fred")
+	err = rec.SetValue(FName, "Fred")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rec.AddValue(FAge, 54)
+	err = rec.SetValue(FAge, 54)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,15 +260,15 @@ func Test_Session_Session_Save(t *testing.T) {
 
 func Test_Session_Session_Batch(t *testing.T) {
 	setupTest()
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer sess.Close()
 
-	persons := sess.TableByKey(TPersonK)
+	persons := sess.TableByKey(TPerson)
 	if persons == nil {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
 	sess.dialect = new(DialectSqlite3)
@@ -321,7 +302,7 @@ func Test_Session_Session_Batch(t *testing.T) {
 
 func Test_Session_Session_Begin_DBNil(t *testing.T) {
 	setupTest()
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -335,7 +316,7 @@ func Test_Session_Session_Begin_DBNil(t *testing.T) {
 
 func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 	setupTest()
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -357,7 +338,7 @@ func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 
 func Test_Session_Session_Commit_NilTx(t *testing.T) {
 	setupTest()
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -373,16 +354,16 @@ func Test_Session_Session_Commit_NilTx(t *testing.T) {
 
 func Test_Session_Session_BatchMany(t *testing.T) {
 	setupTest()
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer sess.Close()
 	sess.readWrite = true
 
-	persons := sess.TableByKey(TPersonK)
+	persons := sess.TableByKey(TPerson)
 	if persons == nil {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
 	records, err := nPersonRecords(persons, 10000)
@@ -434,11 +415,11 @@ func Test_Session_Session_Save_MissingNotNullValue(t *testing.T) {
 	sess.dialect = new(DialectSqlite3)
 
 	rec := persons.NewRecord()
-	err = rec.AddValue(FId, 23)
+	err = rec.SetValue(FId, 23)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = rec.AddValue(FAge, 54)
+	err = rec.SetValue(FAge, 54)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -475,12 +456,12 @@ func Test_Session_Session_Save_MissingPK(t *testing.T) {
 
 	rec := persons.NewRecord()
 
-	err = rec.AddValue(FName, "Fred")
+	err = rec.SetValue(FName, "Fred")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rec.AddValue(FAge, 54)
+	err = rec.SetValue(FAge, 54)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -498,15 +479,15 @@ func Test_Session_Session_Save_MissingPK(t *testing.T) {
 
 func Test_Session_Session_Get(t *testing.T) {
 	setupTest()
-	sess, err := initAndPopulateTestTables()
+	sess, err := initAndWriteTestTableSchema()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer sess.Close()
 
-	persons := sess.TableByKey(TPersonK)
+	persons := sess.TableByKey(TPerson)
 	if persons == nil {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPersonK))
+		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
 	}
 
 	sess.dialect = new(DialectSqlite3)
@@ -580,8 +561,8 @@ func TestSession_InstantiateModel_ReadOnly(t *testing.T) {
 
 // Helpers
 
-func nPersonRecords(persons *Table, n int) ([]*Record, error) {
-	records := make([]*Record, n)
+func nPersonRecords(persons *Table, n int) ([]*InRecord, error) {
+	records := make([]*InRecord, n)
 
 	for i := 0; i < n; i++ {
 		rec := persons.NewRecord()
@@ -594,52 +575,73 @@ func nPersonRecords(persons *Table, n int) ([]*Record, error) {
 	return records, nil
 }
 
-func simplePersonRecord(rec *Record, n int) error {
-	rec.AddValue(FId, n)
+func simplePersonRecord(rec *InRecord, n int) error {
+	rec.SetValue(FId, n)
 
-	err := rec.AddValue(FName, "Fred_"+strconv.Itoa(n))
+	err := rec.SetValue(FName, "Fred_"+strconv.Itoa(n))
 	if err != nil {
 		return err
 	}
 
-	err = rec.AddValue(FAge, 54)
+	err = rec.SetValue(FAge, 54)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func twoPersonRecords(persons *Table) ([]*Record, error) {
-	records := make([]*Record, 2)
+func twoPersonRecords2(sess *Session, persons *Table) error {
+	err := sess.SaveFields(persons, []*Value{
+		{field: persons.Field(FId), value: VPersonID0},
+		{field: persons.Field(FName), value: VPersonName0},
+		{field: persons.Field(FAge), value: VPersonAge0},
+	})
+	if err != nil {
+		return err
+	}
+	err = sess.SaveFields(persons, []*Value{
+		{field: persons.Field(FId), value: VPersonID1},
+		{field: persons.Field(FName), value: VPersonName1},
+		{field: persons.Field(FAge), value: VPersonAge1},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func twoPersonRecords(persons *Table) ([]*InRecord, error) {
+	records := make([]*InRecord, 2)
 
 	rec1 := persons.NewRecord()
 	records[0] = rec1
-	err := rec1.AddValue(FId, VPersonID0)
+	err := rec1.SetValue(FId, VPersonID0)
 	if err != nil {
 		return nil, err
 	}
-	err = rec1.AddValue(FName, "Fred")
+	err = rec1.SetValue(FName, "Fred")
 	if err != nil {
 		return nil, err
 	}
 
-	err = rec1.AddValue(FAge, 54)
+	err = rec1.SetValue(FAge, 54)
 	if err != nil {
 		return nil, err
 	}
 
 	rec2 := persons.NewRecord()
 	records[1] = rec2
-	err = rec2.AddValue(FId, VPersonID1)
+	err = rec2.SetValue(FId, VPersonID1)
 	if err != nil {
 		return nil, err
 	}
-	err = rec2.AddValue(FName, "Harry")
+	err = rec2.SetValue(FName, "Harry")
 	if err != nil {
 		return nil, err
 	}
 
-	err = rec2.AddValue(FAge, 21)
+	err = rec2.SetValue(FAge, 21)
 	if err != nil {
 		return nil, err
 	}
@@ -657,16 +659,16 @@ func addForeignKey_Setup() (*Model, *Table, *Table, error) {
 		return nil, nil, nil, err
 	}
 
-	persons := model.TableByKey(TPersonK)
+	persons := model.TableByKey(TPerson)
 
 	if persons == nil {
-		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPersonK)
+		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TPerson)
 	}
 
-	addresses := model.TableByKey(TAddressK)
+	addresses := model.TableByKey(TAddress)
 
 	if addresses == nil {
-		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TAddressK)
+		return nil, nil, nil, fmt.Errorf("Table key %s not found by manager but should be found", TAddress)
 	}
 
 	return model, persons, addresses, nil

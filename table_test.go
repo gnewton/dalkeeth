@@ -195,7 +195,8 @@ func simpleTestTable() (*sql.DB, *Table, error) {
 }
 
 func testTable() (*Table, error) {
-	tbl, err := NewTable(TestTable0)
+	model := NewModel()
+	tbl, err := model.NewTable(TestTable0)
 	if err != nil {
 		return nil, err
 	}
@@ -218,12 +219,12 @@ func populateTable(db *sql.DB, tbl *Table) error {
 
 	rec := tbl.NewRecord()
 
-	err := rec.AddValue("id", TestId0)
+	err := rec.SetValue("id", TestId0)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	err = rec.AddValue("name", TestName0)
+	err = rec.SetValue("name", TestName0)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -231,12 +232,12 @@ func populateTable(db *sql.DB, tbl *Table) error {
 
 	rec2 := tbl.NewRecord()
 
-	err = rec2.AddValue("id", TestId1)
+	err = rec2.SetValue("id", TestId1)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	err = rec2.AddValue("name", TestName1)
+	err = rec2.SetValue("name", TestName1)
 	if err != nil {
 		log.Println(err)
 		return err

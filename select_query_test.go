@@ -4,22 +4,20 @@ import (
 	"testing"
 )
 
-func Test00(t *testing.T) {
+func TestSelectQuery_FullStruct(t *testing.T) {
 	setupTest()
 	model, err := defineTestModel()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	//age, ok := model.fieldTableMap["persons.age"]
-	//age, ok := model.fieldTableMap["addresses.street"]
-	ageField, ok := model.fieldTableMap[TAddress+"."+FStreet]
-	if !ok {
+	ageField := model.TableField(TAddress, FStreet)
+	if ageField == nil {
 		t.Log(model.fieldTableMap)
 		t.Fatal("Unable to find persons.age field")
 	}
 
-	addressTable, ok := model.tablesMap[TAddressK]
+	addressTable, ok := model.tablesMap[TAddress]
 	if !ok {
 		t.Fatal("Unable to find addresses table")
 	}

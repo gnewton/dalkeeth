@@ -7,7 +7,8 @@ import (
 )
 
 const TPerson = "persons"
-const TPersonK = "person_key"
+
+// const TPersonK = "person_key"
 const FId = "id"
 const FName = "name"
 const FAge = "age"
@@ -24,20 +25,21 @@ const VPersonAge1 = 37
 const VPersonWeight1 = 60
 
 const TAddress = "addresses"
-const TAddressK = "address_key"
+
+// const TAddressK = "address_key"
 const FStreet = "street"
 const FCity = "city"
 
 const JTPersonName = "person_address"
-const JTPersonNameKey = "person_address_key"
+
+// const JTPersonNameK = "person_address_key"
 const FPersonId = "person_id"
 const FAddressId = "address_id"
 
 func defineTestModel() (*Model, error) {
-	//mgr := NewSession()
 	model := NewModel()
 
-	persons, err := NewTable(TPerson)
+	persons, err := model.NewTable(TPerson)
 	if err != nil {
 		return nil, err
 	}
@@ -73,10 +75,9 @@ func defineTestModel() (*Model, error) {
 			defaultValue: "person's \"`name",
 		},
 	}...)
-	model.AddTable(TPersonK, persons)
 
 	//
-	addresses, err := NewTable(TAddress)
+	addresses, err := model.NewTable(TAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -101,12 +102,9 @@ func defineTestModel() (*Model, error) {
 		}}...); err != nil {
 		return nil, err
 	}
-	err = model.AddTable(TAddressK, addresses) // FIXXX
-	if err != nil {
-		return nil, err
-	}
+
 	//
-	person_address, err := NewTable(JTPersonName)
+	person_address, err := model.NewTable(JTPersonName)
 	if err != nil {
 		return nil, err
 	}
@@ -129,10 +127,6 @@ func defineTestModel() (*Model, error) {
 		return nil, err
 	}
 
-	err = model.AddTable(JTPersonNameKey, person_address) // FIXXX
-	if err != nil {
-		return nil, err
-	}
 	err = model.AddForeignKey(person_address, FPersonId, persons, FId)
 	if err != nil {
 		return nil, err
@@ -144,7 +138,13 @@ func defineTestModel() (*Model, error) {
 	return model, model.Freeze()
 }
 
-func initAndPopulateTestTables() (*Session, error) {
+func writeTestTableRecords(sess *Session) error {
+	return NotImplemented
+	//	return nil
+
+}
+
+func initAndWriteTestTableSchema() (*Session, error) {
 	model, err := defineTestModel()
 
 	if err != nil {
@@ -185,12 +185,12 @@ func initAndPopulateTestTables() (*Session, error) {
 		result, err := db.Exec(createSql)
 
 		if err != nil {
-			log.Println(fmt.Errorf("initAndPopulateTestTables: %s", err))
+			log.Println(fmt.Errorf("initAndWriteTestTableSchema: %s", err))
 			return nil, err
 		}
 		_, err = result.RowsAffected()
 		if err != nil {
-			log.Println(fmt.Errorf("initAndPopulateTestTables: %s", err))
+			log.Println(fmt.Errorf("initAndWriteTestTableSchema: %s", err))
 			return nil, err
 		}
 
@@ -212,4 +212,106 @@ func initAndPopulateTestTables() (*Session, error) {
 	}
 
 	return sess, nil
+}
+
+func fullModel() (*Model, error) {
+	mdl := new(Model)
+	//clients := mdl.NewTable("clients")
+	clients, err := mdl.NewTable("clients")
+	if err != nil {
+		return nil, err
+	}
+
+	// Client: id, name, city
+	clients.AddFields([]*Field{
+		&Field{
+			name:      "id",
+			fieldType: IntType,
+			pk:        true,
+		},
+		&Field{
+			name:      "name",
+			fieldType: StringType,
+			length:    64,
+			notNull:   true,
+		},
+		&Field{
+			name:      "city",
+			fieldType: IntType,
+		},
+	}...)
+
+	// Order: id, clientId
+	orders, err := mdl.NewTable("orders")
+	if err != nil {
+		return nil, err
+	}
+
+	orders.AddFields([]*Field{
+		&Field{
+			name:      "clientId",
+			fieldType: IntType,
+		},
+		&Field{
+			name:      "orderId",
+			fieldType: IntType,
+		},
+	}...)
+	// Product: id, name
+	products, err := mdl.NewTable("products")
+	if err != nil {
+		return nil, err
+	}
+
+	products.AddFields([]*Field{
+		&Field{
+			name:      "id",
+			fieldType: IntType,
+			pk:        true,
+		},
+		&Field{
+			name:      "name",
+			fieldType: StringType,
+		},
+	}...)
+
+	// OrderProductJoin: clientId, productId
+	orderProducts, err := mdl.NewTable("order_products_join")
+	if err != nil {
+		return nil, err
+	}
+
+	orderProducts.AddFields([]*Field{
+		&Field{
+			name:      "id",
+			fieldType: IntType,
+			pk:        true,
+		},
+		&Field{
+			name:      "orderId",
+			fieldType: IntType,
+		},
+		&Field{
+			name:      "productId",
+			fieldType: IntType,
+		},
+	}...)
+	// City: id, name
+	cities, err := mdl.NewTable("cities")
+	if err != nil {
+		return nil, err
+	}
+
+	cities.AddFields([]*Field{
+		&Field{
+			name:      "id",
+			fieldType: IntType,
+			pk:        true,
+		},
+		&Field{
+			name:      "name",
+			fieldType: StringType,
+		},
+	}...)
+	return mdl, nil
 }

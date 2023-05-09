@@ -44,7 +44,7 @@ func Test_SimpleStringField_WrongNArgs(t *testing.T) {
 		t.Error()
 	}
 
-	fName := NewField("name", StringType, true, false, false, 0)
+	fName := Field{name: "name", fieldType: StringType, pk: true}
 	//fAge := NewField("age", IntType, true, false, false, 0)
 
 	countNameField := fName.Count()

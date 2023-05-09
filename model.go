@@ -1,6 +1,7 @@
 package dalkeeth
 
 import (
+	"errors"
 	"fmt"
 	"log"
 )
@@ -21,6 +22,21 @@ func NewModel() *Model {
 	return m
 }
 
+func (m *Model) NewTable(name string) (*Table, error) {
+	if name == "" {
+		return nil, errors.New("Table name is empty")
+	}
+	tbl := new(Table)
+	tbl.name = name
+	tbl.fieldsMap = make(map[string]*Field, 0)
+
+	err := m.addTable(name, tbl)
+	if err != nil {
+		return nil, err
+	}
+	return tbl, nil
+}
+
 func (m *Model) Freeze() error {
 	if m.frozen {
 		return fmt.Errorf("Model is already frozen: multiple freezes?")
@@ -31,12 +47,24 @@ func (m *Model) Freeze() error {
 		tbl := m.tables[i]
 		// fields
 		for i := 0; i < len(tbl.fields); i++ {
-			m.fieldTableMap[tbl.name+"."+tbl.fields[i].name] = tbl.fields[i]
+			m.fieldTableMap[fieldTableMapKey(tbl.name, tbl.fields[i].name)] = tbl.fields[i]
 			log.Println("Adding table.field", tbl.name+"."+tbl.fields[i].name)
 		}
 	}
 	m.frozen = true
 	return nil
+}
+
+func fieldTableMapKey(table, field string) string {
+	return table + "." + field
+}
+
+func (m *Model) TableField(tableName, fieldName string) *Field {
+	field, ok := m.fieldTableMap[fieldTableMapKey(tableName, fieldName)]
+	if !ok {
+		return nil
+	}
+	return field
 }
 
 func (m *Model) HasTable(tbl *Table) bool {
@@ -57,7 +85,7 @@ func (m *Model) TableByKey(key string) *Table {
 }
 
 // Key is mneumonic for table; Does not have to be the same as the table sql name.
-func (m *Model) AddTable(key string, tbl *Table) error {
+func (m *Model) addTable(key string, tbl *Table) error {
 	if m.frozen {
 		return fmt.Errorf("Model is frozen: cannot add table to field")
 	}

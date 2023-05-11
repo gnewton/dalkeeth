@@ -6,7 +6,6 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
-	"strconv"
 	"testing"
 )
 
@@ -557,96 +556,6 @@ func TestSession_InstantiateModel_ReadOnly(t *testing.T) {
 		t.Fatal(ShouldHaveFailed)
 	}
 	//t.Log(err)
-}
-
-// Helpers
-
-func nPersonRecords(persons *Table, n int) ([]*InRecord, error) {
-	records := make([]*InRecord, n)
-
-	for i := 0; i < n; i++ {
-		rec := persons.NewRecord()
-		err := simplePersonRecord(rec, i)
-		if err != nil {
-			return nil, err
-		}
-		records[i] = rec
-	}
-	return records, nil
-}
-
-func simplePersonRecord(rec *InRecord, n int) error {
-	rec.SetValue(FId, n)
-
-	err := rec.SetValue(FName, "Fred_"+strconv.Itoa(n))
-	if err != nil {
-		return err
-	}
-
-	err = rec.SetValue(FAge, 54)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func twoPersonRecords2(sess *Session, persons *Table) error {
-	err := sess.SaveFields(persons, []*Value{
-		{field: persons.Field(FId), value: VPersonID0},
-		{field: persons.Field(FName), value: VPersonName0},
-		{field: persons.Field(FAge), value: VPersonAge0},
-	})
-	if err != nil {
-		return err
-	}
-	err = sess.SaveFields(persons, []*Value{
-		{field: persons.Field(FId), value: VPersonID1},
-		{field: persons.Field(FName), value: VPersonName1},
-		{field: persons.Field(FAge), value: VPersonAge1},
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func twoPersonRecords(persons *Table) ([]*InRecord, error) {
-	records := make([]*InRecord, 2)
-
-	rec1 := persons.NewRecord()
-	records[0] = rec1
-	err := rec1.SetValue(FId, VPersonID0)
-	if err != nil {
-		return nil, err
-	}
-	err = rec1.SetValue(FName, "Fred")
-	if err != nil {
-		return nil, err
-	}
-
-	err = rec1.SetValue(FAge, 54)
-	if err != nil {
-		return nil, err
-	}
-
-	rec2 := persons.NewRecord()
-	records[1] = rec2
-	err = rec2.SetValue(FId, VPersonID1)
-	if err != nil {
-		return nil, err
-	}
-	err = rec2.SetValue(FName, "Harry")
-	if err != nil {
-		return nil, err
-	}
-
-	err = rec2.SetValue(FAge, 21)
-	if err != nil {
-		return nil, err
-	}
-
-	return records, nil
 }
 
 func openTestDB() (*sql.DB, error) {

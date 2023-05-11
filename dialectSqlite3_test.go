@@ -11,7 +11,11 @@ import (
 func TestDialectSqlite3(t *testing.T) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	setupTest()
-	sess, err := initAndWriteTestTableSchema()
+	mdl0, err := testModel0()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sess, err := writeTestModelSchema(mdl0)
 
 	if err != nil {
 		t.Error(err)

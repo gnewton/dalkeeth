@@ -49,9 +49,12 @@ func (m *Model) Freeze() error {
 		for i := 0; i < len(tbl.fields); i++ {
 			m.fieldTableMap[fieldTableMapKey(tbl.name, tbl.fields[i].name)] = tbl.fields[i]
 			log.Println("Adding table.field", tbl.name+"."+tbl.fields[i].name)
+			// TODO
+			// - verify the field default values are the right type (they are defined as strings)
 		}
 	}
 	m.frozen = true
+
 	return nil
 }
 

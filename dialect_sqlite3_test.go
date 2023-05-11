@@ -5,7 +5,11 @@ import (
 )
 
 func Test_DeleteSql_Raw(t *testing.T) {
-	sess, err := initAndWriteTestTableSchema()
+	mdl0, err := testModel0()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sess, err := writeTestModelSchema(mdl0)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,7 @@ import (
 
 func TestSelectQuery_FullStruct(t *testing.T) {
 	setupTest()
-	model, err := defineTestModel()
+	model, err := testModel0()
 	if err != nil {
 		t.Fatal(err)
 	}

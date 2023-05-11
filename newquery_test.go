@@ -6,8 +6,8 @@ import (
 
 func TestNewQuery_T1(t *testing.T) {
 	setupTest()
-	//mgr, err := defineTestModel()
-	_, err := defineTestModel()
+	//mgr, err := testModel0()
+	_, err := testModel0()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,9 +12,13 @@ const TPerson = "persons"
 // const TPersonK = "person_key"
 const FId = "id"
 const FName = "name"
+const FNameDefaultValue = "no-name"
 const FAge = "age"
+const FAgeDefaultValue = "99"
 const FWeight = "weight"
+const FWeightDefaultValue = "1"
 const FCitizen = "citizen"
+const FCitizenDefaultValue = "true"
 const VPersonID0 = int64(43)
 const VPersonName0 = "Fred"
 const VPersonAge0 = 42
@@ -37,7 +41,7 @@ const JTPersonName = "person_address"
 const FPersonId = "person_id"
 const FAddressId = "address_id"
 
-func defineTestModel() (*Model, error) {
+func testModel0() (*Model, error) {
 	model := NewModel()
 
 	persons, err := model.NewTable(TPerson)
@@ -58,22 +62,22 @@ func defineTestModel() (*Model, error) {
 		&Field{
 			name:         FAge,
 			fieldType:    IntType,
-			defaultValue: "42",
+			defaultValue: FAgeDefaultValue,
 		},
 		&Field{
 			name:         FWeight,
 			fieldType:    FloatType,
-			defaultValue: "72",
+			defaultValue: FWeightDefaultValue,
 		},
 		&Field{
 			name:         FCitizen,
 			fieldType:    BoolType,
-			defaultValue: "true",
+			defaultValue: FCitizenDefaultValue,
 		},
 		&Field{
 			name:         FName,
 			fieldType:    StringType,
-			defaultValue: "person's \"`name",
+			defaultValue: FNameDefaultValue,
 		},
 	}...)
 
@@ -146,14 +150,8 @@ func writeTestTableRecords(sess *Session) error {
 
 }
 
-func initAndWriteTestTableSchema() (*Session, error) {
-	model, err := defineTestModel()
-
-	if err != nil {
-		return nil, err
-	}
-
-	sess, err := NewSession(model)
+func writeTestModelSchema(mdl *Model) (*Session, error) {
+	sess, err := NewSession(mdl)
 	if err != nil {
 		return nil, err
 	}
@@ -187,12 +185,12 @@ func initAndWriteTestTableSchema() (*Session, error) {
 		result, err := db.Exec(createSql)
 
 		if err != nil {
-			log.Println(fmt.Errorf("initAndWriteTestTableSchema: %s", err))
+			log.Println(fmt.Errorf("writeTestModelSchema: %s", err))
 			return nil, err
 		}
 		_, err = result.RowsAffected()
 		if err != nil {
-			log.Println(fmt.Errorf("initAndWriteTestTableSchema: %s", err))
+			log.Println(fmt.Errorf("writeTestModelSchema: %s", err))
 			return nil, err
 		}
 

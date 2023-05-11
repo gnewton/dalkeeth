@@ -15,6 +15,8 @@ const FName = "name"
 const FNameDefaultValue = "no-name"
 const FAge = "age"
 const FAgeDefaultValue = "99"
+const FAgeMinValue = 0
+const FAgeMaxValue = 150
 const FWeight = "weight"
 const FWeightDefaultValue = "1"
 const FCitizen = "citizen"
@@ -63,6 +65,10 @@ func testModel0() (*Model, error) {
 			name:         FAge,
 			fieldType:    IntType,
 			defaultValue: FAgeDefaultValue,
+			rangge: &Range{
+				min: FAgeMinValue,
+				max: FAgeMaxValue,
+			},
 		},
 		&Field{
 			name:         FWeight,

@@ -45,6 +45,11 @@ type Field struct {
 	notNull      bool
 	defaultValue string
 	table        *Table
+	rangge       *Range
+}
+
+type Range struct {
+	min, max int64
 }
 
 type FieldAs struct {

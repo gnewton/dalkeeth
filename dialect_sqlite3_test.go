@@ -1,10 +1,21 @@
 package dalkeeth
 
 import (
+	"fmt"
+	"log"
 	"testing"
 )
 
-func Test_DeleteSql_Raw(t *testing.T) {
+func Test_SimplePKLookup(t *testing.T) {
+	tests := map[int64]bool{
+		0:          false,
+		VPersonID0: true,
+		-1:         false,
+	}
+
+	for k, v := range tests {
+		log.Println(k, v)
+	}
 	mdl0, err := testModel0()
 	if err != nil {
 		t.Fatal(err)
@@ -17,10 +28,11 @@ func Test_DeleteSql_Raw(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// end setup
 
 	personTbl := sess.TableByKey(TPerson)
 	if personTbl == nil {
-		t.Fatal("Unable to find table")
+		t.Fatal("Unable to find table", TPerson)
 	}
 
 	idField := personTbl.Field(FId)
@@ -29,12 +41,8 @@ func Test_DeleteSql_Raw(t *testing.T) {
 	}
 	nameField := personTbl.Field(FName)
 	if nameField == nil {
-		t.Fatal("Unabler to find field with key=", FName)
+		t.Fatal(fmt.Errorf("Unabler to find field=%s in table=%s", FName, TPerson))
 	}
-
-	r := personTbl.NewRecord()
-	//r.SetValues([]*Value{})
-	r.SetValues([]*Value{{field: idField, value: 43}, {field: nameField, value: "Bob"}})
 
 	rec, err := sess.Get(personTbl, VPersonID0)
 	if err != nil {

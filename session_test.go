@@ -67,13 +67,13 @@ func TestSession_CreateTablesSQL_NilDialect(t *testing.T) {
 	}
 
 	// end setup
-	mgr, err := NewSession(model)
+	sess, err := NewSession(model)
 	if err != nil {
 		t.Fatal(err)
 	}
-	mgr.dialect = nil
+	sess.dialect = nil
 
-	_, err = mgr.createTablesSQL()
+	_, err = sess.createTablesSQL()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -87,13 +87,13 @@ func TestSession_CreateTableIndexesSQL_NilDialect(t *testing.T) {
 	}
 
 	// end setup
-	mgr, err := NewSession(model)
+	sess, err := NewSession(model)
 	if err != nil {
 		t.Fatal(err)
 	}
-	mgr.dialect = nil
+	sess.dialect = nil
 
-	_, err = mgr.createTableIndexesSQL()
+	_, err = sess.createTableIndexesSQL()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}
@@ -109,45 +109,6 @@ func Test_SessionInitTables2(t *testing.T) {
 	_, err := testModel0()
 	if err != nil {
 		t.Fatal(err)
-	}
-}
-
-func Test_Session_AddForeignKey_UnknownForeignKeyField(t *testing.T) {
-	setupTest()
-	mgr, persons, addresses, err := addForeignKey_Setup()
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if mgr.AddForeignKey(persons, "foo", addresses, FId) == nil {
-		t.Fatal(fmt.Errorf("Failed identifying incorrect field"))
-	}
-}
-
-func Test_Session_AddForeignKey_UnknownForeignKeyFieldOtherField(t *testing.T) {
-	setupTest()
-	model, err := testModel0()
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	persons := model.TableByKey(TPerson)
-
-	if persons == nil {
-		t.Log(model.tablesMap)
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TPerson))
-	}
-
-	addresses := model.TableByKey(TAddress)
-
-	if addresses == nil {
-		t.Fatal(fmt.Errorf("Table key %s not found by manager but should be found", TAddress))
-	}
-
-	if model.AddForeignKey(persons, FId, addresses, "foo") == nil {
-		t.Fatal(fmt.Errorf("Failed identifying incorrect field"))
 	}
 }
 

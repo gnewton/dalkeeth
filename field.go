@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -135,27 +136,33 @@ func (f *Field) Count() AField {
 }
 
 func (f *Field) Avg() AField {
+	log.Fatal(NotImplemented)
 	return nil
 }
 
 func (f *Field) Round() AField {
+	log.Fatal(NotImplemented)
 	return nil
 }
 
 // Conditions on fields (where, having)
 
 func (f *Field) In(in ...any) *Condition {
+	log.Fatal(NotImplemented)
 	return nil
 }
 
 func (f *Field) Is(v any) *Condition {
+	log.Fatal(NotImplemented)
 	return nil
 }
 
 func (f *Field) IsGreaterThan(v any) *Condition {
+	log.Fatal(NotImplemented)
 	return nil
 }
 
 func (f *Field) IsLessThan(v any) Condition {
+	log.Fatal(NotImplemented)
 	return nil
 }

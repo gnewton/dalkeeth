@@ -272,7 +272,6 @@ func (t *Table) AddField(f *Field) (*Field, error) {
 	}
 
 	f.table = t
-
 	t.fields = append(t.fields, f)
 	t.fieldsMap[f.name] = f
 

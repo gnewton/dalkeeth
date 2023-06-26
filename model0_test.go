@@ -33,10 +33,11 @@ const FStreet = "street"
 const FCity = "city"
 
 const JTPersonName = "person_address"
-
-// const JTPersonNameK = "person_address_key"
 const FPersonId = "person_id"
 const FAddressId = "address_id"
+
+var XPersonIdField *Field
+var XAddressField *Field
 
 func testModel0() (*Model, error) {
 	model := NewModel()
@@ -50,12 +51,14 @@ func testModel0() (*Model, error) {
 		return nil, err
 	}
 
+	XPersonIdField = &Field{
+		name:      FId,
+		fieldType: IntType,
+		pk:        true,
+	}
+
 	err = persons.AddFields([]*Field{
-		&Field{
-			name:      FId,
-			fieldType: IntType,
-			pk:        true,
-		},
+		XPersonIdField,
 		&Field{
 			name:         FAge,
 			fieldType:    IntType,

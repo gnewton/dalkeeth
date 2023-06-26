@@ -17,6 +17,7 @@ type Dialect interface {
 	JoinSql(*Join, string, ...*Field) error
 	SaveSql(*InRecord) (string, error)
 	SelectQuerySql(*SelectQuery) (string, error)
+	SelectQuerySql2(*Query) (string, error)
 	Table(*Table) (string, error)
 	ValidTableName(string) error
 

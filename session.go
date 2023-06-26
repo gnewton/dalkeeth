@@ -14,7 +14,7 @@ type Session struct {
 	selectLimits  map[*Table]int64
 	dialect       Dialect
 	fieldTableMap map[string]*Field // "key=tablename.fieldname", value=*Field
-	readWrite     bool
+	readOnly      bool
 }
 
 func NewSession(model *Model) (*Session, error) {
@@ -38,11 +38,11 @@ func (sess *Session) TableByKey(key string) *Table {
 	return sess.model.TableByKey(key)
 }
 
-func (sess *Session) InstantiateModel() error {
-	if !sess.readWrite {
-		return errors.New("InstantiateModel: session is read-only")
+func (sess *Session) WriteModelTableSchemaToDB() error {
+	if sess.readOnly {
+		return errors.New("Session.WriteModelTableSchemaToDB: session is read-only")
 	}
-	return nil
+	return NotImplemented
 }
 
 func (sess *Session) createTablesSQL() ([]string, error) {
@@ -83,7 +83,7 @@ func (sess *Session) createTableIndexesSQL() ([]string, error) {
 
 // Creates new tx and commits at end
 func (sess *Session) BatchChannel(chunkSize int) (chan *InRecord, error) {
-	if !sess.readWrite {
+	if sess.readOnly {
 		return nil, errors.New("BatchChannel: session is read-only")
 	}
 	return nil, NotImplemented
@@ -91,7 +91,7 @@ func (sess *Session) BatchChannel(chunkSize int) (chan *InRecord, error) {
 
 // Creates new tx and commits at end
 func (sess *Session) Batch(recs []*InRecord) error {
-	if !sess.readWrite {
+	if sess.readOnly {
 		return errors.New("Batch: session is read-only")
 	}
 	var err error
@@ -136,7 +136,7 @@ func (sess *Session) Batch(recs []*InRecord) error {
 }
 
 func (sess *Session) Update(r *InRecord) error {
-	if !sess.readWrite {
+	if sess.readOnly {
 		return errors.New("Update: session is read-only")
 	}
 	return NotImplemented
@@ -220,7 +220,7 @@ func (sess *Session) SaveFields(tbl *Table, values []*Value) error {
 
 // Using db, not tx
 func (sess *Session) Save(r *InRecord) error {
-	if !sess.readWrite {
+	if sess.readOnly {
 		return errors.New("Save: session is read-only")
 	}
 	if r == nil {
@@ -252,7 +252,7 @@ func (sess *Session) Save(r *InRecord) error {
 }
 
 func (sess *Session) SaveTx(r *InRecord) error {
-	if !sess.readWrite {
+	if sess.readOnly {
 		return errors.New("SaveTx: session is read-only")
 	}
 	if sess.tx == nil {
@@ -328,7 +328,7 @@ func (sess *Session) Rollback() error {
 
 // Using db, not tx
 func (sess *Session) Delete(tbl *Table, id int64) error {
-	if !sess.readWrite {
+	if sess.readOnly {
 		return errors.New("Save: session is read-only")
 	}
 	if tbl == nil {
@@ -365,5 +365,15 @@ func (sess *Session) NewSelectQuery() *SelectQuery {
 
 func (sess *Session) Exists(t *Table, id int64) (bool, error) {
 	return recordExists(sess.db, t.name, id)
+
+}
+
+func (sess *Session) ExecuteQuery(q *Query) error {
+	err := sess.model.VerifyQuery(q)
+
+	if err != nil {
+		return err
+	}
+	return NotImplemented
 
 }

@@ -18,7 +18,7 @@ func TestDialectSqlite3(t *testing.T) {
 	sess, err := writeTestModelSchema(mdl0)
 
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	_, err = sess.dialect.ExtractTable(sess.db, TPerson)

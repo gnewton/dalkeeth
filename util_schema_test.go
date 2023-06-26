@@ -3,8 +3,8 @@ package dalkeeth
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
-	//	"os"
 )
 
 func writeTestTableRecords(sess *Session) error {
@@ -45,17 +45,19 @@ func writeTestModelSchema(mdl *Model) (*Session, error) {
 	for i := 0; i < len(sqls); i++ {
 		createSql := sqls[i]
 		log.Println(createSql)
-		//fmt.Fprintln(os.Stdout, createSql)
+		fmt.Fprintln(os.Stdout, createSql)
 		result, err := db.Exec(createSql)
 
 		if err != nil {
 			log.Println(fmt.Errorf("writeTestModelSchema: %s", err))
-			return nil, err
+			//return nil, err
+			return nil, fmt.Errorf("DB.Exec error: %w", err)
 		}
 		_, err = result.RowsAffected()
 		if err != nil {
-			log.Println(fmt.Errorf("writeTestModelSchema: %s", err))
-			return nil, err
+			//log.Println(fmt.Errorf("writeTestModelSchema: %s", err))
+			return nil, fmt.Errorf("result.RowsAffected: %w", err)
+			//return nil, err
 		}
 
 	}

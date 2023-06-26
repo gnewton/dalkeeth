@@ -29,14 +29,14 @@ func TestSession_Table_EmptyString(t *testing.T) {
 
 func TestSession_Table_UnknownString(t *testing.T) {
 	setupTest()
-	mgr, err := testModel0()
+	sess, err := testModel0()
 	if err != nil {
 		t.Fatal(err)
 	}
 	// end setup
 
 	tName := "not-existing-table-foo"
-	tbl := mgr.TableByKey(tName)
+	tbl := sess.TableByKey(tName)
 	if tbl != nil {
 		t.Fatal(fmt.Errorf("Table should not exist: %s", tName))
 	}
@@ -126,8 +126,6 @@ func Test_Session_Session_SaveTx(t *testing.T) {
 	}
 	defer sess.Close()
 
-	sess.readWrite = true
-
 	persons := sess.TableByKey(TPerson)
 	if persons == nil {
 		t.Error(errors.New("Persons cannot be found: is nil"))
@@ -194,7 +192,6 @@ func Test_Session_Session_Save(t *testing.T) {
 	}
 
 	sess.dialect = new(DialectSqlite3)
-	sess.readWrite = true
 
 	pk := int64(23)
 	rec := persons.NewRecord()
@@ -245,7 +242,7 @@ func Test_Session_Session_Batch(t *testing.T) {
 	}
 
 	sess.dialect = new(DialectSqlite3)
-	sess.readWrite = true
+
 	records, err := twoPersonRecords(persons)
 	if err != nil {
 		t.Fatal(err)
@@ -302,7 +299,6 @@ func Test_Session_Session_Begin_DoubleTx(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer sess.Close()
-	sess.readWrite = true
 
 	err = sess.Begin()
 	if err != nil {
@@ -348,7 +344,6 @@ func Test_Session_Session_BatchMany(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer sess.Close()
-	sess.readWrite = true
 
 	persons := sess.TableByKey(TPerson)
 	if persons == nil {
@@ -484,7 +479,6 @@ func Test_Session_Session_Get(t *testing.T) {
 	}
 
 	sess.dialect = new(DialectSqlite3)
-	sess.readWrite = true
 
 	records, err := twoPersonRecords(persons)
 	if err != nil {
@@ -545,7 +539,7 @@ func TestSession_InstantiateModel_ReadOnly(t *testing.T) {
 
 	// end setup
 
-	err = sess.InstantiateModel()
+	err = sess.WriteModelTableSchemaToDB()
 	if err == nil {
 		t.Fatal(ShouldHaveFailed)
 	}

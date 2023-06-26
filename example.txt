@@ -45,3 +45,4 @@ DBCommand cmd = context.createCommand()
    .orderBy (BRAND.NAME.desc(), MODEL.SPECIFICATION.asc());
 
 
+   .where   (MODEL.BASE_PRICE.IS(GreaterThan,30000)

@@ -149,3 +149,19 @@ func (mdl *Model) AddForeignKey(tbl *Table, field string, foreignTbl *Table, for
 
 	return tbl.addForeignKey(f, foreignTbl, fk)
 }
+
+func (m *Model) VerifyQuery(*Query) error {
+	// check:
+	// - selectFields
+	// - fromTables
+	// - whereEquals
+	// - where
+	// - joins
+	// - joinsByName
+	// - groupBy
+	// - having
+	// - orderBy
+	// - offset
+	// - limit
+	return NotImplemented
+}

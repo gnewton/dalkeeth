@@ -102,7 +102,7 @@ func (d *DialectSqlite3) CreateTableSql(t *Table) (string, error) {
 		return "", err
 	}
 
-	s := "CREATE TABLE " + t.name
+	s := "CREATE TABLE IF NOT EXISTS " + t.name
 
 	if len(t.fields) == 0 {
 		return "", errors.New("Num fields = zero")
@@ -238,6 +238,9 @@ func (d *DialectSqlite3) ExtractTable(db *sql.DB, tableName string) (*Table, err
 }
 
 func (d *DialectSqlite3) tableInfo(db *sql.DB, tableName string) (*Table, error) {
+	if db == nil {
+		return nil, errors.New("DB is nil")
+	}
 	q := fmt.Sprintf("PRAGMA table_info(%s);", tableName)
 	var cid, notNull, pk int64
 	var name, ftype string
@@ -526,4 +529,70 @@ func (d *DialectSqlite3) FieldAsSql(fa *FieldAs) (string, error) {
 	}
 
 	return fa.field.name + " AS " + fa.alias, nil
+}
+
+func (d *DialectSqlite3) SelectQuerySql2(q *Query) (string, error) {
+	var sql string = "SELECT "
+
+	err := makeSelectFields(&sql, q.selectFields, q.selectRaw)
+	if err != nil {
+		return "", err
+	}
+
+	sql += " FROM "
+
+	err = makeFromTables(&sql, q.fromTables, q.fromRaw)
+	if err != nil {
+		return "", err
+	}
+
+	err = makeWhereClause(&sql, q.where, q.whereEquals, q.whereRaw)
+	if err != nil {
+		return "", err
+	}
+
+	return sql, nil
+}
+
+func makeSelectFields(sql *string, fields []*Field, rawFields []string) error {
+	for i := 0; i < len(fields); i++ {
+		if i != 0 {
+			*sql += ","
+		}
+		*sql += fields[i].name
+	}
+
+	for i := 0; i < len(rawFields); i++ {
+		if i != 0 || len(fields) > 0 {
+			*sql += ","
+		}
+		*sql += rawFields[i]
+	}
+
+	return nil
+}
+
+func makeFromTables(sql *string, tables []*Table, rawTables string) error {
+	for i := 0; i < len(tables); i++ {
+		if i != 0 {
+			*sql += ","
+		}
+		*sql += tables[i].name
+	}
+
+	if len(tables) > 0 && len(rawTables) > 0 {
+		*sql += ","
+	}
+	*sql += rawTables
+
+	*sql += " "
+
+	return nil
+}
+
+func makeWhereClause(sql *string, where []*Condition, whereEquals []AField, whereRaw string) error {
+
+	*sql += "WHERE "
+
+	return nil
 }

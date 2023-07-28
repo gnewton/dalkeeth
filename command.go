@@ -8,5 +8,5 @@ func (c *Command) New() *Command {
 }
 
 func (c *Command) Select() *Command {
-	return nil
+	return c
 }
